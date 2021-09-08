@@ -140,7 +140,7 @@ Resources:
   DBRoleS3Access:
     Type: AWS::IAM::Role
     Properties:
-      AssumePolicyDocument:
+      AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
           - Effect: Allow
@@ -158,8 +158,8 @@ Resources:
       Description: Custom parameter group for MySQL 5.7
       Family: aurora-mysql5.7
       Parameters:
-        aws_default_s3_role: !GetAtt DBRoleS3Access
-        aurora_load_from_s3_role: !GetAtt DBRoleS3Access
+        aws_default_s3_role: !GetAtt DBRoleS3Access.Arn
+        aurora_load_from_s3_role: !GetAtt DBRoleS3Access.Arn
   WorkshopSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
