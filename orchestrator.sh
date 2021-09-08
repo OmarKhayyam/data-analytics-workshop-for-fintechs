@@ -11,4 +11,8 @@ ec2instance=`aws cloudformation describe-stacks --stack-name datagenstack | pyth
 
 echo $s3bucketname $ec2instance
 
-aws ssm send-command --instance-ids "$ec2instance" --document-name "AWS-RunShellScript" --comment "Git clone repo" --parameters 'commands=["cd /home/ec2-user","git clone https://github.com/OmarKhayyam/data-lake-aws.git"]'
+cmdid=`aws ssm send-command --instance-ids "$ec2instance" --document-name "AWS-RunShellScript" --comment "Git clone repo" --targets "Key=instanceids,Values=$ec2instance" --parameters 'commands=["cd /home/ec2-user","git clone https://github.com/OmarKhayyam/data-lake-aws.git"]' | python3 -c "import sys, json; print(json.load(sys.stdin)['Command']['CommandId'])"`
+
+echo $cmdid
+
+aws ssm command-executed --command-id $cmdid --instance-id $ec2instance
