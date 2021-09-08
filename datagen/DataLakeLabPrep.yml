@@ -164,6 +164,7 @@ Resources:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
       DBSubnetGroupName: ws-db-subnet-group
+      DBSubnetGroupDescription: Subnet group for RDS Aurora
       SubnetIds:
         - !Ref RDSPrivateSubnet1
         - !Ref RDSPrivateSubnet2
