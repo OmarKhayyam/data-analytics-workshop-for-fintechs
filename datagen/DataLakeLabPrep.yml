@@ -141,3 +141,6 @@ Outputs:
   SourceAndDataBucket:
     Description: The S3 bucket where source and intermediate data may be stored.
     Value: !Ref LabBucket
+  BastionInstance:
+    Description: Instance created for data generation
+    Value: !Ref Ec2Instance
