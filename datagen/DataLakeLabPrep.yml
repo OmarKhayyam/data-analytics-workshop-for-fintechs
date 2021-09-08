@@ -145,8 +145,8 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-            Service:
-              - rds.amazonaws.com
+              Service:
+                - rds.amazonaws.com
             Action:
               - sts:AssumeRole
       ManagedPolicyArns:
