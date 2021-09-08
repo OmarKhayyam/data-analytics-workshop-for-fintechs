@@ -137,6 +137,60 @@ Resources:
     Type: AWS::EC2::EIP
     Properties:
       InstanceId: !Ref Ec2Instance      
+  DBRoleS3Access:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+            Service:
+              - rds.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      RoleName: ws-aurora-s3-load
+  ClusterPG:
+    Type: AWS::RDS::DBClusterParameterGroup
+    Properties:
+      Description: Custom parameter group for MySQL 5.7
+      Family: aurora-mysql5.7
+      Parameters:
+        aws_default_s3_role: !GetAtt DBRoleS3Access
+        aurora_load_from_s3_role: !GetAtt DBRoleS3Access
+  WorkshopSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: ws-db-subnet-group
+      SubnetIds:
+        - !Ref RDSPrivateSubnet1
+        - !Ref RDSPrivateSubnet2
+  DataSourceSG:
+    Type: AWS::RDS::DBSecurityGroup
+    Properties:
+      GroupDescription: SG for DB
+      EC2VpcId: !Ref LabVPC
+      DBSecurityGroupIngress:
+        -
+          EC2SecurityGroupId: !Ref Ec2SecurityGroup
+  DataSourceDB:
+    Type: AWS::RDS::DBCluster
+    Properties:
+      AssociatedRoles:
+        - !GetAtt DBRoleS3Access.Arn
+      DatabaseName: workshopdb1
+      DBClusterParameterGroupName: !Ref ClusterPG
+      DBSubnetGroupName: !Ref WorkshopSubnetGroup
+      DeleteProtection: 'false'
+      EnableIAMDatabaseAuthentication: 'false'
+      Engine: aurora-mysql
+      EngineMode: provisioned
+      MasterUsername: admin
+      MasterUserPassword: master123
+      VpcSecuritygroupIds:
+        - DataSourceSG
 Outputs:
   SourceAndDataBucket:
     Description: The S3 bucket where source and intermediate data may be stored.
@@ -144,3 +198,6 @@ Outputs:
   BastionInstance:
     Description: Instance created for data generation
     Value: !Ref Ec2Instance
+  DBEndpoint:
+    Description: DB endpoint
+    Value: !GetAtt DataSourceDB.Endpoint.Address
