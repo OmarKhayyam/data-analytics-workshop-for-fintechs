@@ -184,7 +184,6 @@ Resources:
       DatabaseName: workshopdb1
       DBClusterParameterGroupName: !Ref ClusterPG
       DBSubnetGroupName: !Ref WorkshopSubnetGroup
-      DeleteProtection: 'false'
       EnableIAMDatabaseAuthentication: 'false'
       Engine: aurora-mysql
       EngineMode: provisioned
