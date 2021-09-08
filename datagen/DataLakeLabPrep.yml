@@ -1,0 +1,143 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+Resources:
+  LabBucket:
+    Type: AWS::S3::Bucket
+  LabVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+  RDSPrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: 'us-east-1a'
+      VpcId: !Ref LabVPC
+  RDSPrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: 'us-east-1b'
+      VpcId: !Ref LabVPC
+  EC2PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: 'us-east-1c'
+      VpcId: !Ref LabVPC
+  LabPrepIGateway:
+    Type: AWS::EC2::InternetGateway
+  LabGatewayAttach:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref LabPrepIGateway
+      VpcId: !Ref LabVPC
+  RDSRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref LabVPC
+  EC2RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref LabVPC
+  EC2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref EC2RouteTable
+      SubnetId: !Ref EC2PublicSubnet
+  RDSRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RDSRouteTable
+      SubnetId: !Ref RDSPrivateSubnet1
+  RDSRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RDSRouteTable
+      SubnetId: !Ref RDSPrivateSubnet2
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: LabGatewayAttach
+    Properties:
+      RouteTableId: !Ref EC2RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref LabPrepIGateway
+  Ec2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SG for Ec2 instance
+      GroupName: ws-EC2-sg
+      VpcId: !Ref LabVPC
+  Ec2InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Description: Role for EC2 instance
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonS3FullAccess
+      RoleName: ws-instance-role
+  Ec2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref Ec2InstanceRole
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      DisableApiTermination: 'false'
+      InstanceInitiatedShutdownBehavior: stop
+      EbsOptimized: 'true'
+      ImageId: !Ref LatestAmiId
+      InstanceType: t3.micro
+      UserData:
+        Fn::Base64: !Sub |
+          Content-Type: multipart/mixed; boundary="//"
+          MIME-Version: 1.0
+
+          --//
+          Content-Type: text/cloud-config; charset="us-ascii"
+          MIME-Version: 1.0
+          Content-Transfer-Encoding: 7bit
+          Content-Disposition: attachment; filename="cloud-config.txt"
+
+          #cloud-config
+          cloud_final_modules:
+          - [scripts-user, always]
+
+          --//
+          Content-Type: text/x-shellscript; charset="us-ascii"
+          MIME-Version: 1.0
+          Content-Transfer-Encoding: 7bit
+          Content-Disposition: attachment; filename="userdata.txt"
+
+          #!/bin/bash -xe
+          sudo yum update -y
+          sudo yum install -y mysql57
+          sudo yum install -y git
+      Monitoring: 'false'
+      SecurityGroupIds:
+        - !GetAtt Ec2SecurityGroup.GroupId
+      SubnetId: !Ref EC2PublicSubnet
+      IamInstanceProfile: !Ref Ec2InstanceProfile
+  LabInstanceEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref Ec2Instance      
+Outputs:
+  SourceAndDataBucket:
+    Description: The S3 bucket where source and intermediate data may be stored.
+    Value: !Ref LabBucket
