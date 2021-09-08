@@ -189,7 +189,7 @@ Resources:
       EngineMode: provisioned
       MasterUsername: admin
       MasterUserPassword: master123
-      VpcSecuritygroupIds:
+      VpcSecurityGroupIds:
         - DataSourceSG
 Outputs:
   SourceAndDataBucket:
