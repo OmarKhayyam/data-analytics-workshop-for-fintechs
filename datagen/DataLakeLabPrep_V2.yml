@@ -163,7 +163,7 @@ Resources:
       Engine: aurora-mysql
       EngineMode: provisioned
       MasterUserPassword: master123
-      MasterUserName: admin
+      MasterUsername: admin
       VpcSecurityGroupIds:
         - !GetAtt DataSourceSG.GroupId
   DataSourceInstance1:
