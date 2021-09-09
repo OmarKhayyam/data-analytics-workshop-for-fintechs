@@ -160,6 +160,7 @@ Resources:
         - RoleArn: !GetAtt DBRoleS3Access.Arn
       DBClusterParameterGroupName: !Ref ClusterPG
       DBSubnetGroupName: !Ref WorkshopSubnetGroup
+      DatabaseName: workshopdb1
       Engine: aurora-mysql
       EngineMode: provisioned
       MasterUserPassword: master123
@@ -170,7 +171,6 @@ Resources:
     Type: AWS::RDS::DBInstance
     Properties:
       DBClusterIdentifier: !Ref DataSourceDB
-      DBName: workshopdb1
       DBInstanceClass: db.r5.large
       Engine: aurora-mysql
       AllowMajorVersionUpgrade: 'false'

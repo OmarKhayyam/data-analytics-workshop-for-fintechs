@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 
 import random 
+import argparse
+import logging
+import boto3
+from botocore.exceptions import ClientError
 import mysql.connector
 from mysql.connector import errorcode
 
@@ -56,11 +60,11 @@ TABLES['customers'] = (
         "PRIMARY KEY (`user_id`))"
         )
 
-def persistAccns():
+def persistAccns(s3bucket,endpoint):
     print("Setting up accounts...")
     accnslist = generateaccnnos()
     ## We already expect the workshopdb1 to exist
-    conn = mysql.connector.connect(user='admin',password='master123', host='database-2-instance-1.ckyzeld8ogd5.us-east-1.rds.amazonaws.com')
+    conn = mysql.connector.connect(user='admin',password='master123', host=endpoint)
     cursor = conn.cursor()
     try:
         print("Creating the table structure...")
@@ -81,11 +85,18 @@ def persistAccns():
             print(err.msg)
     else:
         print("OK - tables created.")
-    with open('account_ids.txt', 'w') as f:
-        for item in accnslist:
-            f.write("%s\n" % item)
+    	with open('account_ids.txt', 'w') as f:
+        	for item in accnslist:
+            		f.write("%s\n" % item)
+	s3_client = boto3.client('s3')
+	try:
+		object_name = 'DBINPUT/'+'account_ids.txt'
+		response = s3_client.upload_file('account_ids.txt', s3bucket, object_name)
+	except ClientError as e:	
+		logging.error(e)
+		return False
     try:
-        cursor.execute("LOAD DATA FROM S3 's3://workshopdb1-input/DBINPUT/account_ids.txt' INTO TABLE customers (user_id)")
+        cursor.execute("LOAD DATA FROM S3 's3://'+s3bucket+'/DBINPUT/account_ids.txt' INTO TABLE customers (user_id)")
     except:
         print(err.msg)
         cursor.close()
@@ -95,4 +106,19 @@ def persistAccns():
     cursor.close()
     conn.close()
 
-persistAccns()
+#Initialize parser
+parser = argparse.ArgumentParser()
+
+#Add argument flag
+parser.add_argument("-s","--sourcebucket",help = "Source S3 bucket")
+parser.add_argument("-e","--endpoint",help = "DB end point")
+
+#Read arguments from commandline
+args = parser.parse_args()
+
+if args.sourcebucket:
+	ep = args.endpoint
+if args.sourcebucket:
+	bkt = args.sourcebucket
+
+persistAccns(bkt,ep)
