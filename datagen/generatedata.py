@@ -86,15 +86,15 @@ def persistAccns(s3bucket,endpoint):
     else:
         print("OK - tables created.")
     	with open('account_ids.txt', 'w') as f:
-        	for item in accnslist:
-            		f.write("%s\n" % item)
+            for item in accnslist:
+       	        f.write("%s\n" % item)
 	s3_client = boto3.client('s3')
 	try:
-		object_name = 'DBINPUT/'+'account_ids.txt'
-		response = s3_client.upload_file('account_ids.txt', s3bucket, object_name)
+	    object_name = 'DBINPUT/'+'account_ids.txt'
+	    response = s3_client.upload_file('account_ids.txt', s3bucket, object_name)
 	except ClientError as e:	
-		logging.error(e)
-		return False
+	    logging.error(e)
+	    return False
     try:
         cursor.execute("LOAD DATA FROM S3 's3://'+s3bucket+'/DBINPUT/account_ids.txt' INTO TABLE customers (user_id)")
     except:
@@ -117,8 +117,8 @@ parser.add_argument("-e","--endpoint",help = "DB end point")
 args = parser.parse_args()
 
 if args.sourcebucket:
-	ep = args.endpoint
+    ep = args.endpoint
 if args.sourcebucket:
-	bkt = args.sourcebucket
+    bkt = args.sourcebucket
 
 persistAccns(bkt,ep)
