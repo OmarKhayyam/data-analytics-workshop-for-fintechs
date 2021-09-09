@@ -174,7 +174,6 @@ Resources:
       DBInstanceClass: db.r5.large
       Engine: aurora-mysql
       AllowMajorVersionUpgrade: 'false'
-      VPCSecurityGroups: ****
 Outputs:
   SourceAndDataBucket:
     Description: The S3 bucket where source and intermediate data may be stored.
