@@ -131,7 +131,7 @@ Resources:
     Type: AWS::RDS::DBClusterParameterGroup
     Properties:
       Description: Custom parameter group for MySQL 5.7
-      Family: aurora5.6
+      Family: aurora-mysql5.7
       Parameters:
         aws_default_s3_role: !GetAtt DBRoleS3Access.Arn
         aurora_load_from_s3_role: !GetAtt DBRoleS3Access.Arn
