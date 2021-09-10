@@ -85,7 +85,7 @@ def persistAccns(s3bucket,endpoint):
             print(err.msg)
     else:
         print("OK - tables created.")
-    	with open('account_ids.txt', 'w') as f:
+        with open('account_ids.txt', 'w') as f:
             for item in accnslist:
        	        f.write("%s\n" % item)
 	s3_client = boto3.client('s3')
