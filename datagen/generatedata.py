@@ -54,12 +54,6 @@ TABLES['customeractivity'] = (
         "PRIMARY KEY (`user_id`))"
         )
 
-TABLES['customers'] = (
-        "CREATE TABLE `customers` ("
-        "`user_id` int(11) NOT NULL," 
-        "PRIMARY KEY (`user_id`))"
-        )
-
 def persistAccns(s3bucket,endpoint):
     print("Setting up accounts...")
     accnslist = generateaccnnos()
@@ -75,9 +69,8 @@ def persistAccns(s3bucket,endpoint):
             print(err)
             exit(1)
     try:
-        print("Creating tables {} and {}".format("customeractivity","customers"))
+        print("Creating table {}".format("customeractivity"))
         cursor.execute(TABLES['customeractivity'])
-        cursor.execute(TABLES['customers'])
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
             print("already exists.")
@@ -95,14 +88,6 @@ def persistAccns(s3bucket,endpoint):
         except ClientError as e:	
             logging.error(e)
             return False
-    try:
-        cursor.execute("LOAD DATA FROM S3 s3://"+s3bucket+"/DBINPUT/account_ids.txt INTO TABLE customers (user_id)")
-    except:
-        print(err.msg)
-        cursor.close()
-        conn.close
-        exit(1)
-
     cursor.close()
     conn.close()
 
