@@ -50,7 +50,7 @@ TABLES['customeractivity'] = (
         "`monetary_value` decimal(8,2) NOT NULL, "
         "`timeinapp` smallint NOT NULL, "
         "`feature_used` enum('FUNDTRANSFER','UPITRANSACTION','ENQUIRY','FOREX','MF-INVEST','CAPITALMARKET-INVEST','FD-INVEST','PENSIONFUND-INVEST') NOT NULL, "
-        "ts TIMESTAMP, "
+        "ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, "
         "PRIMARY KEY (`user_id`))"
         )
 
