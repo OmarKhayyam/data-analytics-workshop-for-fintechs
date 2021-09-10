@@ -9,10 +9,10 @@ counter=0
 
 while [ $counter -lt 3 ]
 do
-	if [`aws cloudformation describe-stacks --stack-name datagenstack | python3 -c "import sys, json; print(json.load(sys.stdin)['Stacks'][0]['Outputs'][$counter]['OutputKey'])"` == "SourceAndDataBucket"]
+	if [`aws cloudformation describe-stacks --stack-name datagenstack | python3 -c "import sys, json; print(json.load(sys.stdin)['Stacks'][0]['Outputs'][$counter]['OutputKey'])"` = "SourceAndDataBucket"]
 	then
 		s3bucketname=`aws cloudformation describe-stacks --stack-name datagenstack | python3 -c "import sys, json; print(json.load(sys.stdin)['Stacks'][0]['Outputs'][$counter]['OutputValue'])"`
-	elif [`aws cloudformation describe-stacks --stack-name datagenstack | python3 -c "import sys, json; print(json.load(sys.stdin)['Stacks'][0]['Outputs'][$counter]['OutputKey'])"` == "DBEndpoint"]
+	elif [`aws cloudformation describe-stacks --stack-name datagenstack | python3 -c "import sys, json; print(json.load(sys.stdin)['Stacks'][0]['Outputs'][$counter]['OutputKey'])"` = "DBEndpoint"]
 	then
 		dbep=`aws cloudformation describe-stacks --stack-name datagenstack | python3 -c "import sys, json; print(json.load(sys.stdin)['Stacks'][0]['Outputs'][$counter]['OutputValue'])"`
 	else
