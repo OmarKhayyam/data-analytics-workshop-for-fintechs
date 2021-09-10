@@ -131,7 +131,7 @@ Resources:
     Type: AWS::RDS::DBClusterParameterGroup
     Properties:
       Description: Custom parameter group for MySQL 5.7
-      Family: aurora5.6
+      Family: aurora-mysql5.7
       Parameters:
         aws_default_s3_role: !GetAtt DBRoleS3Access.Arn
         aurora_load_from_s3_role: !GetAtt DBRoleS3Access.Arn
@@ -158,16 +158,22 @@ Resources:
     Properties:
       AssociatedRoles:
         - RoleArn: !GetAtt DBRoleS3Access.Arn
-      DatabaseName: workshopdb1
       DBClusterParameterGroupName: !Ref ClusterPG
       DBSubnetGroupName: !Ref WorkshopSubnetGroup
-      EnableIAMDatabaseAuthentication: 'false'
-      Engine: aurora
+      DatabaseName: workshopdb1
+      Engine: aurora-mysql
       EngineMode: provisioned
-      MasterUsername: admin
       MasterUserPassword: master123
+      MasterUsername: admin
       VpcSecurityGroupIds:
         - !GetAtt DataSourceSG.GroupId
+  DataSourceInstance1:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref DataSourceDB
+      DBInstanceClass: db.r5.large
+      Engine: aurora-mysql
+      AllowMajorVersionUpgrade: 'false'
 Outputs:
   SourceAndDataBucket:
     Description: The S3 bucket where source and intermediate data may be stored.

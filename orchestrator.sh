@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Instantiate CF Template
-aws cloudformation create-stack --stack-name datagenstack --template-body file://$PWD/datagen/DataLakeLabPrep_V2.yml --capabilities CAPABILITY_NAMED_IAM
+aws cloudformation create-stack --stack-name datagenstack --template-body file://$PWD/datagen/DataLakeLabPrep.yml --capabilities CAPABILITY_NAMED_IAM
 
 aws cloudformation wait stack-create-complete --stack-name datagenstack
 
