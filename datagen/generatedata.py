@@ -88,11 +88,11 @@ def persistAccns(s3bucket,endpoint):
         with open('account_ids.txt', 'w') as f:
             for item in accnslist:
        	        f.write("%s\n" % item)
-	s3_client = boto3.client('s3')
-	try:
-	    object_name = 'DBINPUT/'+'account_ids.txt'
-	    response = s3_client.upload_file('account_ids.txt', s3bucket, object_name)
-	except ClientError as e:	
+        s3_client = boto3.client('s3')
+        try:
+            object_name = 'DBINPUT/'+'account_ids.txt'
+            response = s3_client.upload_file('account_ids.txt', s3bucket, object_name)
+        except ClientError as e:	
             logging.error(e)
             return False
     try:
