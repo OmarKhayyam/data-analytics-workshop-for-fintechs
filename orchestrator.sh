@@ -7,7 +7,7 @@ aws cloudformation wait stack-create-complete --stack-name datagenstack
 
 counter=0
 
-while(1)
+while [ $counter -lt 3 ]
 do
 	if [`aws cloudformation describe-stacks --stack-name datagenstack | python3 -c "import sys, json; print(json.load(sys.stdin)['Stacks'][0]['Outputs'][$counter]['OutputKey'])"` == "SourceAndDataBucket"]
 	then
