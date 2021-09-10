@@ -93,10 +93,10 @@ def persistAccns(s3bucket,endpoint):
 	    object_name = 'DBINPUT/'+'account_ids.txt'
 	    response = s3_client.upload_file('account_ids.txt', s3bucket, object_name)
 	except ClientError as e:	
-	    logging.error(e)
-	    return False
+            logging.error(e)
+            return False
     try:
-        cursor.execute("LOAD DATA FROM S3 's3://'+s3bucket+'/DBINPUT/account_ids.txt' INTO TABLE customers (user_id)")
+        cursor.execute("LOAD DATA FROM S3 s3://"+s3bucket+"/DBINPUT/account_ids.txt INTO TABLE customers (user_id)")
     except:
         print(err.msg)
         cursor.close()
