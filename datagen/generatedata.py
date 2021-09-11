@@ -88,7 +88,7 @@ def persistAccns(s3bucket,endpoint):
         print("OK - tables created.")
         print("Creating replication user debezium...")
         cursor.execute(TABLES['debezium'])
-        print(Granting required permissions to debezium user...")
+        print("Granting required permissions to debezium user...")
         cursor.execute(TABLES['grants'])
         with open('account_ids.txt', 'w') as f:
             for item in accnslist:
