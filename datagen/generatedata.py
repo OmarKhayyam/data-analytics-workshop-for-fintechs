@@ -81,7 +81,7 @@ def persistAccns(s3bucket,endpoint):
         cursor.execute(TABLES['customeractivity'])
         print("Creating replication user debezium...")
         cursor.execute(TABLES['debezium'])
-	print(Granting required permissions to debezium user...")
+        print(Granting required permissions to debezium user...")
         cursor.execute(TABLES['grants'])
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
