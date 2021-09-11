@@ -138,9 +138,15 @@ Resources:
         aurora_load_from_s3_role: !GetAtt DBRoleS3Access.Arn
         binlog_format: 'ROW'
         binlog_row_image: 'full'
+        binlog_rows_query_log_events: 'ON'
+  InstancePG:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Description: PG to enable GTID mode replication
+      Family: aurora-mysql5.7
+      Parameters:
         gtid_mode: 'ON'
         enforce_gtid_consistency: 'ON'
-        binlog_rows_query_log_events: 'ON'
   WorkshopSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
@@ -181,6 +187,7 @@ Resources:
       DBInstanceClass: db.r5.large
       Engine: aurora-mysql
       AllowMajorVersionUpgrade: 'false'
+      DBParameterGroupName: !Ref InstancePG
 Outputs:
   SourceAndDataBucket:
     Description: The S3 bucket where source and intermediate data may be stored.
