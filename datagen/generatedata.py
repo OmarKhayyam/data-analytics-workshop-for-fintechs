@@ -79,10 +79,6 @@ def persistAccns(s3bucket,endpoint):
     try:
         print("Creating table {}".format("customeractivity"))
         cursor.execute(TABLES['customeractivity'])
-        print("Creating replication user debezium...")
-        cursor.execute(TABLES['debezium'])
-        print(Granting required permissions to debezium user...")
-        cursor.execute(TABLES['grants'])
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
             print("already exists.")
@@ -90,6 +86,10 @@ def persistAccns(s3bucket,endpoint):
             print(err.msg)
     else:
         print("OK - tables created.")
+        print("Creating replication user debezium...")
+        cursor.execute(TABLES['debezium'])
+        print(Granting required permissions to debezium user...")
+        cursor.execute(TABLES['grants'])
         with open('account_ids.txt', 'w') as f:
             for item in accnslist:
        	        f.write("%s\n" % item)
