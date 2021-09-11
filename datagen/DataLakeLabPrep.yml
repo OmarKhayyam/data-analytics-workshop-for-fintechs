@@ -135,6 +135,7 @@ Resources:
       Parameters:
         aws_default_s3_role: !GetAtt DBRoleS3Access.Arn
         aurora_load_from_s3_role: !GetAtt DBRoleS3Access.Arn
+        binlog_format: ROW
   WorkshopSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:

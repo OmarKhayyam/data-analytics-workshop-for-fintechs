@@ -26,3 +26,20 @@ print("Created the connection..")
 normal_wf(user,city,dbconn)
 print("Inserted the data..")
 dbconn.close()
+## TEST COMPLETE##
+
+#Initialize parser
+parser = argparse.ArgumentParser()
+
+#Add argument flag
+parser.add_argument("-e","--endpoint",help = "DB end point")
+
+#Read arguments from commandline
+args = parser.parse_args()
+
+if args.endpoint:
+    ep = args.endpoint
+
+dbconn = mysql.connector.connect(user='admin',password='master123', host=ep)
+
+

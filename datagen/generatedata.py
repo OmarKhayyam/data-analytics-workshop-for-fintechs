@@ -101,7 +101,7 @@ parser.add_argument("-e","--endpoint",help = "DB end point")
 #Read arguments from commandline
 args = parser.parse_args()
 
-if args.sourcebucket:
+if args.endpoint:
     ep = args.endpoint
 if args.sourcebucket:
     bkt = args.sourcebucket
