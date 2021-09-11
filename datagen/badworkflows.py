@@ -21,11 +21,11 @@ def normal_wf(user,city,dbconn):
     cursor.close()
 
 ## TEST ##
-dbconn = mysql.connector.connect(user='admin',password='master123', host='datagenstack-datasourcedb-f2xrome5ajrm.cluster-ckyzeld8ogd5.us-east-1.rds.amazonaws.com')
-print("Created the connection..")
-normal_wf(user,city,dbconn)
-print("Inserted the data..")
-dbconn.close()
+#dbconn = mysql.connector.connect(user='admin',password='master123', host='datagenstack-datasourcedb-f2xrome5ajrm.cluster-ckyzeld8ogd5.us-east-1.rds.amazonaws.com')
+#print("Created the connection..")
+#normal_wf(user,city,dbconn)
+#print("Inserted the data..")
+#dbconn.close()
 ## TEST COMPLETE##
 
 #Initialize parser
@@ -41,5 +41,6 @@ if args.endpoint:
     ep = args.endpoint
 
 dbconn = mysql.connector.connect(user='admin',password='master123', host=ep)
-
-
+normal_wf(user,city,dbconn)
+print("Inserted the data..")
+dbconn.close()
