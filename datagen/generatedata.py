@@ -54,6 +54,14 @@ TABLES['customeractivity'] = (
         "PRIMARY KEY (`user_id`))"
         )
 
+TABLES['debezium'] = (
+        "CREATE USER 'debezium'@'%' IDENTIFIED BY 'dbz'"
+        )
+
+TABLES['grants'] = (
+        "GRANT SELECT,RELOAD,SHOW DATABASES,REPLICATION SLAVE,REPLICATION CLIENT,LOCK TABLES ON *.* TO 'debezium' IDENTIFIED BY 'dbz'"
+        )
+
 def persistAccns(s3bucket,endpoint):
     print("Setting up accounts...")
     accnslist = generateaccnnos()
@@ -71,6 +79,10 @@ def persistAccns(s3bucket,endpoint):
     try:
         print("Creating table {}".format("customeractivity"))
         cursor.execute(TABLES['customeractivity'])
+        print("Creating replication user debezium...")
+        cursor.execute(TABLES['debezium'])
+	print(Granting required permissions to debezium user...")
+        cursor.execute(TABLES['grants'])
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
             print("already exists.")
