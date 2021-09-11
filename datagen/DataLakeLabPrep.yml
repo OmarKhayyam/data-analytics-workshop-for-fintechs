@@ -6,6 +6,7 @@ Parameters:
 Resources:
   LabBucket:
     Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
   LabVPC:
     Type: AWS::EC2::VPC
     Properties:
@@ -160,6 +161,7 @@ Resources:
           SourceSecurityGroupId: !GetAtt Ec2SecurityGroup.GroupId
   DataSourceDB:
     Type: AWS::RDS::DBCluster
+    DeletionPolicy: Delete
     Properties:
       AssociatedRoles:
         - RoleArn: !GetAtt DBRoleS3Access.Arn
