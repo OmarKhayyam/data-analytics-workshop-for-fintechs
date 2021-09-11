@@ -137,6 +137,8 @@ Resources:
         aurora_load_from_s3_role: !GetAtt DBRoleS3Access.Arn
         binlog_format: 'ROW'
         binlog_row_image: 'full'
+        gtid_mode: 'ON'
+        enforce_gtid_consistency: 'ON'
   WorkshopSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
