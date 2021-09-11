@@ -39,7 +39,7 @@ if args.endpoint:
     ep = args.endpoint
 
 with open('account_ids.txt') as fr:
-    lines = f.readlines()
+    lines = fr.readlines()
 
 dbconn = mysql.connector.connect(user='admin',password='master123', host=ep)
 count = 0 ## Control the number of DB entries we make
