@@ -195,8 +195,6 @@ Resources:
       NumberOfBrokers: 2
       EnhancedMonitoring: PER_BROKER
       EncryptionInfo:
-        EncryptionAtRest:
-          DataVolumeKMSKeyId: ****
         EncryptionInTransit:
           ClientBroker: TLS
           InCluster: 'true'
