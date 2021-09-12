@@ -1,0 +1,235 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+Resources:
+  LabBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+  LabVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+  RDSPrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: 'us-east-1a'
+      VpcId: !Ref LabVPC
+  RDSPrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: 'us-east-1b'
+      VpcId: !Ref LabVPC
+  EC2PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: 'us-east-1c'
+      VpcId: !Ref LabVPC
+  LabPrepIGateway:
+    Type: AWS::EC2::InternetGateway
+  LabGatewayAttach:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref LabPrepIGateway
+      VpcId: !Ref LabVPC
+  RDSRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref LabVPC
+  EC2RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref LabVPC
+  EC2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref EC2RouteTable
+      SubnetId: !Ref EC2PublicSubnet
+  RDSRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RDSRouteTable
+      SubnetId: !Ref RDSPrivateSubnet1
+  RDSRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RDSRouteTable
+      SubnetId: !Ref RDSPrivateSubnet2
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: LabGatewayAttach
+    Properties:
+      RouteTableId: !Ref EC2RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref LabPrepIGateway
+  Ec2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SG for Ec2 instance
+      GroupName: ws-EC2-sg
+      VpcId: !Ref LabVPC
+  Ec2InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Description: Role for EC2 instance
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonS3FullAccess
+      RoleName: ws-instance-role
+  Ec2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref Ec2InstanceRole
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      DisableApiTermination: 'false'
+      InstanceInitiatedShutdownBehavior: stop
+      EbsOptimized: 'true'
+      ImageId: !Ref LatestAmiId
+      InstanceType: t3.micro
+      Monitoring: 'false'
+      SecurityGroupIds:
+        - !GetAtt Ec2SecurityGroup.GroupId
+      SubnetId: !Ref EC2PublicSubnet
+      IamInstanceProfile: !Ref Ec2InstanceProfile
+  LabInstanceEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref Ec2Instance      
+  DBRoleS3Access:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - rds.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      RoleName: ws-aurora-s3-load
+  ClusterPG:
+    Type: AWS::RDS::DBClusterParameterGroup
+    Properties:
+      Description: Custom parameter group for MySQL 5.7
+      Family: aurora-mysql5.7
+      Parameters:
+        aws_default_s3_role: !GetAtt DBRoleS3Access.Arn
+        aurora_load_from_s3_role: !GetAtt DBRoleS3Access.Arn
+        binlog_format: 'ROW'
+        binlog_row_image: 'full'
+        binlog_rows_query_log_events: 'ON'
+  WorkshopSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: ws-db-subnet-group
+      DBSubnetGroupDescription: Subnet group for RDS Aurora
+      SubnetIds:
+        - !Ref RDSPrivateSubnet1
+        - !Ref RDSPrivateSubnet2
+  DataSourceSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SG for DB
+      VpcId: !Ref LabVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !GetAtt Ec2SecurityGroup.GroupId
+  DataSourceDB:
+    Type: AWS::RDS::DBCluster
+    DeletionPolicy: Delete
+    Properties:
+      AssociatedRoles:
+        - RoleArn: !GetAtt DBRoleS3Access.Arn
+      DBClusterParameterGroupName: !Ref ClusterPG
+      DBSubnetGroupName: !Ref WorkshopSubnetGroup
+      DatabaseName: workshopdb1
+      Engine: aurora-mysql
+      EngineMode: provisioned
+      MasterUserPassword: master123
+      MasterUsername: admin
+      VpcSecurityGroupIds:
+        - !GetAtt DataSourceSG.GroupId
+  DataSourceInstance1:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref DataSourceDB
+      DBInstanceClass: db.r5.large
+      Engine: aurora-mysql
+      AllowMajorVersionUpgrade: 'false'
+  DebeziumRole:
+    Type: AWS::IAM::Role
+    Properties:
+      **** # This is an Ec2 IAM role for the debezium cluster instances
+  KafkaDataVolumeCMK:
+    Type: AWS::KMS::Key
+    Properties:
+      ****
+  IngestionStreamCluster:
+    Type: AWS::MSK::Cluster
+    Properties:
+      ClusterName: DBZIngestCluster
+      KafkaVersion: 2.2.1
+      NumberOfBrokers: 2
+      EnhancedMonitoring: PER_BROKER
+      EncryptionInfo:
+        EncryptionAtRest:
+          DataVolumeKMSKeyId: ****
+        EncryptionInTransit:
+          ClientBroker: TLS
+          InCluster: 'true'
+      OpenMonitoring:
+        Prometheus:
+          JmxExport:
+            EnabledInBroker: 'true'
+          NodeExporter:
+            EnabledInBroker: 'true'
+      ConfigurationInfo:
+        Arn: ****
+        Revision: 1
+      ClientAuthentication:
+        Tls:
+          CertificateAuthorityArnList:
+            - **** ## How will this work for client auth in MSK?
+      BrokerNodeGroupInfo:
+        InstanceType: kafka.t3.small
+        SecurityGroups:
+          - **** ## Will have the SG of the Debezium Cluster
+        StorageInfo:
+          EBSStorageInfo:
+            VolumeSize: 50
+        ClientSubnets:
+          - !Ref RDSPrivateSubnet1
+          - !Ref RDSPrivateSubnet2
+Outputs:
+  SourceAndDataBucket:
+    Description: The S3 bucket where source and intermediate data may be stored.
+    Value: !Ref LabBucket
+  BastionInstance:
+    Description: Instance created for data generation
+    Value: !Ref Ec2Instance
+  DBEndpoint:
+    Description: DB endpoint
+    Value: !GetAtt DataSourceDB.Endpoint.Address

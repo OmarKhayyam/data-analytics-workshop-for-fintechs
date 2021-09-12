@@ -62,6 +62,10 @@ TABLES['grants'] = (
         "GRANT SELECT,RELOAD,SHOW DATABASES,REPLICATION SLAVE,REPLICATION CLIENT,LOCK TABLES ON *.* TO 'debezium' IDENTIFIED BY 'dbz'"
         )
 
+TABLES['encrypt_connection'] = (
+        "ALTER USER 'debezium'@'%' REQUIRE SSL"
+        )
+
 def persistAccns(s3bucket,endpoint):
     print("Setting up accounts...")
     accnslist = generateaccnnos()
@@ -90,6 +94,8 @@ def persistAccns(s3bucket,endpoint):
         cursor.execute(TABLES['debezium'])
         print("Granting required permissions to debezium user...")
         cursor.execute(TABLES['grants'])
+        print("Setting up SSL for debezium user...")
+        cursor.execute(TABLES['encrypt_connection'])
         with open('account_ids.txt', 'w') as f:
             for item in accnslist:
        	        f.write("%s\n" % item)
