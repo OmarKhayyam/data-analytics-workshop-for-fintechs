@@ -7,7 +7,7 @@ mkdir keys && cd keys && cp /usr/lib/jvm/java-1.8.0-openjdk-1.8.0.302.b08-0.amzn
 keytool -genkey -keystore kafka.client.keystore.jks -validity 300 -storepass mystorepass123 -keypass mystorepass123 -dname "CN=workshopattendee" -alias workshopkey -storetype pkcs12
 keytool -keystore kafka.client.keystore.jks -certreq -file client-cert-sign-request -alias workshopkey -storepass mystorepass123 -keypass mystorepass123
 sed 's/NEW //g' client-cert-sign-request > cert.1 && rm -f client-cert-sign-request && mv cert.1 client-cert-sign-request
-certarn=`aws acm-pca issue-certificate --certificate-authority-arn $caarn --csr fileb://client-cert-sign-request --signing-algorithm "SHA256WITHRSA" --validity Value=10,Type="DAYS" | python3 -c "import sys, json; print(json.dumps(json.load(sys.stdin)))"`
+certarn=`aws acm-pca issue-certificate --certificate-authority-arn $caarn --csr fileb://client-cert-sign-request --signing-algorithm "SHA256WITHRSA" --validity Value=10,Type="DAYS" | python3 -c "import sys, json; print(json.dumps(json.load(sys.stdin))['CertificateArn'])"`
 aws acm-pca get-certificate --certificate-authority-arn $caarn --certificate-arn $certarn | python3 -c "import sys, json; certchain = json.load(sys.stdin); print(certchain['Certificate']+"\n"); print(certchain['CertificateChain'])" | sed -e ':a;N;$!ba;s/\\n/\n/g' | tee signed-certificate-from-acm
 keytool -keystore kafka.client.keystore.jks -import -file signed-certificate-from-acm -alias workshopkey -storepass mystorepass123 -keypass mystorepass123 -noprompt
 echo "security.protocol=SSL" > client.properties
