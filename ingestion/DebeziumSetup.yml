@@ -15,6 +15,10 @@ Parameters:
   KafkaPrivateCAformTLS:
     Type: String
     Description: The ARN of the RootCA we created.
+  EC2KeyPair:
+    Type: String
+    Description: The keypair to use with EC2 instances
+    Default: 'workshop-ssh-key'
 Resources:
   LabBucket:
     Type: AWS::S3::Bucket
@@ -43,6 +47,20 @@ Resources:
       CidrBlock: 10.0.3.0/24
       AvailabilityZone: 'us-east-1c'
       VpcId: !Ref LabVPC
+  EC2DebeziumSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.4.0/24
+      AvailabilityZone: 'us-east-1c'
+      MapPublicIpOnLaunch: 'true'
+      VpcId: !Ref LabVPC
+  EC2DebeziumSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.5.0/24
+      AvailabilityZone: 'us-east-1b'
+      MapPublicIpOnLaunch: 'true'
+      VpcId: !Ref LabVPC
   LabPrepIGateway:
     Type: AWS::EC2::InternetGateway
   LabGatewayAttach:
@@ -58,11 +76,25 @@ Resources:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref LabVPC
+  DebeziumRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref LabVPC
   EC2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       RouteTableId: !Ref EC2RouteTable
       SubnetId: !Ref EC2PublicSubnet
+  DebeziumRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref EC2RouteTable
+      SubnetId: !Ref EC2DebeziumSubnet1
+  DebeziumRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref EC2RouteTable
+      SubnetId: !Ref EC2DebeziumSubnet2
   RDSRouteTableAssociation1:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -78,6 +110,13 @@ Resources:
     DependsOn: LabGatewayAttach
     Properties:
       RouteTableId: !Ref EC2RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref LabPrepIGateway
+  DebeziumRoute:
+    Type: AWS::EC2::Route
+    DependsOn: LabGatewayAttach
+    Properties:
+      RouteTableId: !Ref DebeziumRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref LabPrepIGateway
   Ec2SecurityGroup:
@@ -121,6 +160,9 @@ Resources:
         - !GetAtt Ec2SecurityGroup.GroupId
       SubnetId: !Ref EC2PublicSubnet
       IamInstanceProfile: !Ref Ec2InstanceProfile
+      Tags:
+        - Key: Name
+          Value: DataGeneratorInstance
   LabInstanceEIP:
     Type: AWS::EC2::EIP
     Properties:
@@ -276,6 +318,72 @@ Resources:
         ClientSubnets:
           - !Ref RDSPrivateSubnet1
           - !Ref RDSPrivateSubnet2
+  DBZInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Description: Role for Debezium EC2 instance
+      RoleName: ws-dbz-instance-role
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonS3FullAccess
+  DBZInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref DBZInstanceRole
+  DebeziumLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: DBZLaunchTemplate
+      LaunchTemplateData:
+        KeyName: !Ref EC2KeyPair
+        BlockDeviceMappings:
+          - DeviceName: '/dev/xvda'
+            Ebs:
+              VolumeType: 'gp2'
+              VolumeSize: 50
+              DeleteOnTermination: 'true'
+              Encrypted: 'true'
+        IamInstanceProfile: 
+          Arn: !GetAtt
+            - DBZInstanceProfile
+            - Arn
+        ImageId: !Ref LatestAmiId
+        InstanceType: 'r5.large'
+        Monitoring:
+          Enabled: 'true'
+        SecurityGroupIds:
+          - !GetAtt DebeziumSG.GroupId
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Name
+                Value: DebeziumInstance
+  DebeziumCluster:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Description: This defines a single node cluster for debezium.
+    DependsOn: IngestionStreamCluster
+    Properties:
+      AutoScalingGroupName: DBZScaler
+      CapacityRebalance: 'false'
+      LaunchTemplate:
+        LaunchTemplateId: !Ref DebeziumLaunchTemplate
+        Version: !GetAtt DebeziumLaunchTemplate.LatestVersionNumber
+      DesiredCapacity: 1
+      MaxSize: 1
+      MinSize: 0
+      VPCZoneIdentifier:
+        - !Ref EC2DebeziumSubnet1
+        - !Ref EC2DebeziumSubnet2
 Outputs:
   SourceAndDataBucket:
     Description: The S3 bucket where source and intermediate data may be stored.
