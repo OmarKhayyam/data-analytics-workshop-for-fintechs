@@ -1,0 +1,414 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+  YourTeamRoleArn:
+    Type: String
+    Description: Your role ARN.
+  YourKafkaConfig:
+    Type: String
+    Description: Kafka cluster custom configuration ARN.
+  KafkaConfigRevision:
+    Type: Number
+    Description: Revision to use of the custom configuration
+  EC2KeyPair:
+    Type: String
+    Description: The keypair to use with EC2 instances
+    Default: 'workshop-ssh-key'
+Resources:
+  LabBucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Delete
+  LabVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+  RDSPrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: 'us-east-1a'
+      VpcId: !Ref LabVPC
+  RDSPrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: 'us-east-1b'
+      VpcId: !Ref LabVPC
+  EC2PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: 'us-east-1c'
+      VpcId: !Ref LabVPC
+  EC2DebeziumSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.4.0/24
+      AvailabilityZone: 'us-east-1c'
+      MapPublicIpOnLaunch: 'true'
+      VpcId: !Ref LabVPC
+  EC2DebeziumSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      CidrBlock: 10.0.5.0/24
+      AvailabilityZone: 'us-east-1b'
+      MapPublicIpOnLaunch: 'true'
+      VpcId: !Ref LabVPC
+  LabPrepIGateway:
+    Type: AWS::EC2::InternetGateway
+  LabGatewayAttach:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref LabPrepIGateway
+      VpcId: !Ref LabVPC
+  RDSRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref LabVPC
+  EC2RouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref LabVPC
+  DebeziumRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref LabVPC
+  EC2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref EC2RouteTable
+      SubnetId: !Ref EC2PublicSubnet
+  DebeziumRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref EC2RouteTable
+      SubnetId: !Ref EC2DebeziumSubnet1
+  DebeziumRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref EC2RouteTable
+      SubnetId: !Ref EC2DebeziumSubnet2
+  RDSRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RDSRouteTable
+      SubnetId: !Ref RDSPrivateSubnet1
+  RDSRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref RDSRouteTable
+      SubnetId: !Ref RDSPrivateSubnet2
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: LabGatewayAttach
+    Properties:
+      RouteTableId: !Ref EC2RouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref LabPrepIGateway
+  DebeziumRoute:
+    Type: AWS::EC2::Route
+    DependsOn: LabGatewayAttach
+    Properties:
+      RouteTableId: !Ref DebeziumRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref LabPrepIGateway
+  Ec2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SG for Ec2 instance
+      GroupName: ws-EC2-sg
+      VpcId: !Ref LabVPC
+  Ec2InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Description: Role for EC2 instance
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonS3FullAccess
+      RoleName: ws-instance-role
+  Ec2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref Ec2InstanceRole
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      DisableApiTermination: 'false'
+      InstanceInitiatedShutdownBehavior: stop
+      EbsOptimized: 'true'
+      ImageId: !Ref LatestAmiId
+      InstanceType: t3.micro
+      Monitoring: 'false'
+      SecurityGroupIds:
+        - !GetAtt Ec2SecurityGroup.GroupId
+      SubnetId: !Ref EC2PublicSubnet
+      IamInstanceProfile: !Ref Ec2InstanceProfile
+      Tags:
+        - Key: Name
+          Value: DataGeneratorInstance
+  LabInstanceEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      InstanceId: !Ref Ec2Instance      
+  DBRoleS3Access:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - rds.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/AmazonS3FullAccess
+      RoleName: ws-aurora-s3-load
+  ClusterPG:
+    Type: AWS::RDS::DBClusterParameterGroup
+    Properties:
+      Description: Custom parameter group for MySQL 5.7
+      Family: aurora-mysql5.7
+      Parameters:
+        aws_default_s3_role: !GetAtt DBRoleS3Access.Arn
+        aurora_load_from_s3_role: !GetAtt DBRoleS3Access.Arn
+        binlog_format: 'ROW'
+        binlog_row_image: 'full'
+        binlog_rows_query_log_events: 'ON'
+  WorkshopSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: ws-db-subnet-group
+      DBSubnetGroupDescription: Subnet group for RDS Aurora
+      SubnetIds:
+        - !Ref RDSPrivateSubnet1
+        - !Ref RDSPrivateSubnet2
+  DataSourceSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SG for DB
+      VpcId: !Ref LabVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !GetAtt Ec2SecurityGroup.GroupId
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !GetAtt DebeziumSG.GroupId
+  DebeziumSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: The Security group for the Debezium cluster
+      VpcId: !Ref LabVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+  MSKSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: The SG for the MSK cluster
+      VpcId: !Ref LabVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 9091
+          ToPort: 9099
+          SourceSecurityGroupId: !GetAtt DebeziumSG.GroupId
+        - IpProtocol: tcp
+          FromPort: 2180
+          ToPort: 2183
+          SourceSecurityGroupId: !GetAtt DebeziumSG.GroupId
+  DataSourceDB:
+    Type: AWS::RDS::DBCluster
+    DeletionPolicy: Delete
+    Properties:
+      AssociatedRoles:
+        - RoleArn: !GetAtt DBRoleS3Access.Arn
+      DBClusterParameterGroupName: !Ref ClusterPG
+      DBSubnetGroupName: !Ref WorkshopSubnetGroup
+      DatabaseName: workshopdb1
+      Engine: aurora-mysql
+      EngineMode: provisioned
+      MasterUserPassword: master123
+      MasterUsername: admin
+      VpcSecurityGroupIds:
+        - !GetAtt DataSourceSG.GroupId
+  DataSourceInstance1:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBClusterIdentifier: !Ref DataSourceDB
+      DBInstanceClass: db.r5.large
+      Engine: aurora-mysql
+      AllowMajorVersionUpgrade: 'false'
+  KafkaDataVolumeCMK:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: key for encrypting data volume in kafka
+      EnableKeyRotation: 'true'
+      PendingWindowInDays: 7
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: kafka-data-key-1
+        Statement:
+        - Sid: Enable IAM user permissions
+          Effect: Allow
+          Principal:
+            AWS: !Ref YourTeamRoleArn
+          Action: kms:*
+          Resource: '*'
+        - Sid: Allow use of key
+          Effect: Allow
+          Principal:
+            Service: 'kafka.amazonaws.com'
+          Action:
+          - kms:DescribeKey
+          - kms:Encrypt
+          - kms:Decrypt
+          - kms:ReEncrypt*
+          - kms:GenerateDataKey
+          - kms:GenerateDataKeyWithoutPlaintext
+          Resource: '*'      
+  IngestionStreamCluster:
+    Type: AWS::MSK::Cluster
+    Properties:
+      ClusterName: DBZIngestCluster
+      KafkaVersion: 2.2.1
+      NumberOfBrokerNodes: 2
+      EnhancedMonitoring: PER_BROKER
+      EncryptionInfo:
+        EncryptionInTransit:
+          InCluster: 'true'
+      OpenMonitoring:
+        Prometheus:
+          JmxExporter:
+            EnabledInBroker: 'true'
+          NodeExporter:
+            EnabledInBroker: 'true'
+      ConfigurationInfo:
+        Arn: !Ref YourKafkaConfig
+        Revision: !Ref KafkaConfigRevision
+      ClientAuthentication:
+        Sasl:
+          Iam:
+            Enabled: 'true'
+      BrokerNodeGroupInfo:
+        InstanceType: kafka.t3.small
+        SecurityGroups:
+          - !GetAtt MSKSG.GroupId
+        StorageInfo:
+          EBSStorageInfo:
+            VolumeSize: 50
+        ClientSubnets:
+          - !Ref RDSPrivateSubnet1
+          - !Ref RDSPrivateSubnet2
+  DBZInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Description: Role for Debezium EC2 instance
+      RoleName: ws-dbz-instance-role
+      Policies:
+        - PolicyName: KafkaClusterAuthnAuthzPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'kafka-cluster:Connect'
+                  - 'kafka-cluster:CreateTopic'
+                  - 'kafka-cluster:DescribeTopic'
+                  - 'kafka-cluster:WriteData'
+                  - 'kafka-cluster:WriteDataIdempotently'
+                Resource: '*'
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonS3FullAccess
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AWSKeyManagementServicePowerUser
+  DBZInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref DBZInstanceRole
+  DebeziumLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: DBZLaunchTemplate
+      LaunchTemplateData:
+        KeyName: !Ref EC2KeyPair
+        BlockDeviceMappings:
+          - DeviceName: '/dev/xvda'
+            Ebs:
+              VolumeType: 'gp2'
+              VolumeSize: 50
+              DeleteOnTermination: 'true'
+              Encrypted: 'true'
+        IamInstanceProfile: 
+          Arn: !GetAtt
+            - DBZInstanceProfile
+            - Arn
+        ImageId: !Ref LatestAmiId
+        InstanceType: 'r5.large'
+        Monitoring:
+          Enabled: 'true'
+        SecurityGroupIds:
+          - !GetAtt DebeziumSG.GroupId
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - Key: Name
+                Value: DebeziumInstance
+  DebeziumCluster:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Description: This defines a single node cluster for debezium.
+    DependsOn: IngestionStreamCluster
+    Properties:
+      AutoScalingGroupName: DBZScaler
+      CapacityRebalance: 'false'
+      LaunchTemplate:
+        LaunchTemplateId: !Ref DebeziumLaunchTemplate
+        Version: !GetAtt DebeziumLaunchTemplate.LatestVersionNumber
+      DesiredCapacity: 1
+      MaxSize: 1
+      MinSize: 0
+      VPCZoneIdentifier:
+        - !Ref EC2DebeziumSubnet1
+        - !Ref EC2DebeziumSubnet2
+Outputs:
+  SourceAndDataBucket:
+    Description: The S3 bucket where source and intermediate data may be stored.
+    Value: !Ref LabBucket
+  BastionInstance:
+    Description: Instance created for data generation
+    Value: !Ref Ec2Instance
+  DBEndpoint:
+    Description: DB endpoint
+    Value: !GetAtt DataSourceDB.Endpoint.Address
+  MSKClusterArn:
+    Description: ARN of the MSK cluster
+    Value: !Ref IngestionStreamCluster

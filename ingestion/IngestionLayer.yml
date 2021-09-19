@@ -3,19 +3,59 @@ Parameters:
   LatestAmiId:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
     Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
-  YourTeamRoleArn:
+  TeamRoleArn:
     Type: String
-    Description: Your role ARN.
-  YourKafkaConfig:
-    Type: String
-    Description: Kafka cluster custom configuration ARN.
-  KafkaConfigRevision:
-    Type: Number
-    Description: Revision to use of the custom configuration
-  KafkaPrivateCAformTLS:
-    Type: String
-    Description: The ARN of the RootCA we created.
+    Description: ARN of the TeamRole IAM Role
 Resources:
+  WSKinesisKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: A key for Kinesis
+      EnableKeyRotation: 'true'
+      PendingWindowInDays: 7
+      KeyPolicy:
+        Version: '2012-10-17'
+        Id: kinesis-key
+        Statement:
+          - Sid: Enable IAM user permissions
+            Effect: Allow
+            Principal:
+              AWS: !Ref TeamRoleArn
+            Action: kms:*
+            Resource: '*'
+          - Sid: Allow use of key
+            Effect: Allow
+            Principal:
+              Service: kinesis.amazonaws.com
+            Action:
+              - kms:DescribeKey
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:generateDataKey
+              - kms:GenerateDataKeyWithoutPlaintext
+            Resource: '*'
+  WSKinesisStream:
+    Type: AWS::Kinesis::Stream
+    Properties:
+      Name: 'stream-destination'
+      ShardCount: 1
+      StreamEncryption:
+        EncryptionType: KMS
+        KeyId: !GetAtt WSKinesisKey.KeyId
+  DMSSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SG for DMS
+      VpcId: !Ref LabVPC
+  DMSSubnetGroup:
+    Type: AWS::DMS::ReplicationSubnetGroup
+    Properties:
+      ReplicationSubnetGroupIdentifier: replication-subnet-group
+      ReplicationSubnetGroupDescription: Subnet group for DMS
+      SubnetIds:
+        - !Ref RDSPrivateSubnet1
+        - !Ref RDSPrivateSubnet2
   LabBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Delete
@@ -172,26 +212,7 @@ Resources:
         - IpProtocol: tcp
           FromPort: 3306
           ToPort: 3306
-          SourceSecurityGroupId: !GetAtt DebeziumSG.GroupId
-  DebeziumSG:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: The Security group for the Debezium cluster
-      VpcId: !Ref LabVPC
-  MSKSG:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: The SG for the MSK cluster
-      VpcId: !Ref LabVPC
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 9091
-          ToPort: 9099
-          SourceSecurityGroupId: !GetAtt DebeziumSG.GroupId
-        - IpProtocol: tcp
-          FromPort: 2180
-          ToPort: 2183
-          SourceSecurityGroupId: !GetAtt DebeziumSG.GroupId
+          SourceSecurityGroupId: !GetAtt DMSSG.GroupId
   DataSourceDB:
     Type: AWS::RDS::DBCluster
     DeletionPolicy: Delete
@@ -214,68 +235,6 @@ Resources:
       DBInstanceClass: db.r5.large
       Engine: aurora-mysql
       AllowMajorVersionUpgrade: 'false'
-  KafkaDataVolumeCMK:
-    Type: AWS::KMS::Key
-    Properties:
-      Description: key for encrypting data volume in kafka
-      EnableKeyRotation: 'true'
-      PendingWindowInDays: 7
-      KeyPolicy:
-        Version: '2012-10-17'
-        Id: kafka-data-key-1
-        Statement:
-        - Sid: Enable IAM user permissions
-          Effect: Allow
-          Principal:
-            AWS: !Ref YourTeamRoleArn
-          Action: kms:*
-          Resource: '*'
-        - Sid: Allow use of key
-          Effect: Allow
-          Principal:
-            Service: 'kafka.amazonaws.com'
-          Action:
-          - kms:DescribeKey
-          - kms:Encrypt
-          - kms:Decrypt
-          - kms:ReEncrypt*
-          - kms:GenerateDataKey
-          - kms:GenerateDataKeyWithoutPlaintext
-          Resource: '*'      
-  IngestionStreamCluster:
-    Type: AWS::MSK::Cluster
-    Properties:
-      ClusterName: DBZIngestCluster
-      KafkaVersion: 2.2.1
-      NumberOfBrokerNodes: 2
-      EnhancedMonitoring: PER_BROKER
-      EncryptionInfo:
-        EncryptionInTransit:
-          ClientBroker: TLS
-          InCluster: 'true'
-      OpenMonitoring:
-        Prometheus:
-          JmxExporter:
-            EnabledInBroker: 'true'
-          NodeExporter:
-            EnabledInBroker: 'true'
-      ConfigurationInfo:
-        Arn: !Ref YourKafkaConfig
-        Revision: !Ref KafkaConfigRevision
-      ClientAuthentication:
-        Tls:
-          CertificateAuthorityArnList:
-            - !Ref KafkaPrivateCAformTLS
-      BrokerNodeGroupInfo:
-        InstanceType: kafka.t3.small
-        SecurityGroups:
-          - !GetAtt MSKSG.GroupId
-        StorageInfo:
-          EBSStorageInfo:
-            VolumeSize: 50
-        ClientSubnets:
-          - !Ref RDSPrivateSubnet1
-          - !Ref RDSPrivateSubnet2
 Outputs:
   SourceAndDataBucket:
     Description: The S3 bucket where source and intermediate data may be stored.
@@ -286,6 +245,6 @@ Outputs:
   DBEndpoint:
     Description: DB endpoint
     Value: !GetAtt DataSourceDB.Endpoint.Address
-  MSKClusterArn:
-    Description: ARN of the MSK cluster
-    Value: !Ref IngestionStreamCluster
+  MigrationSubnetGroup:
+    Description: The subnet group the DMS service will use
+    Value: !Ref DMSSubnetGroup
