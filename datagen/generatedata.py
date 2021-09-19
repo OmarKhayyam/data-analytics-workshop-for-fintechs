@@ -55,7 +55,7 @@ TABLES['customeractivity'] = (
         )
 
 TABLES['debezium'] = (
-        "CREATE USER 'debezium'@'%' IDENTIFIED BY 'dbz'"
+        "CREATE USER 'replicator'@'%' IDENTIFIED BY 'repltr'"
         )
 
 TABLES['grants'] = (
