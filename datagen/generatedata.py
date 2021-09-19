@@ -50,7 +50,7 @@ TABLES['customeractivity'] = (
         "`monetary_value` decimal(8,2) NOT NULL, "
         "`timeinapp` smallint NOT NULL, "
         "`feature_used` enum('FUNDTRANSFER','UPITRANSACTION','ENQUIRY','FOREX','MF-INVEST','CAPITALMARKET-INVEST','FD-INVEST','PENSIONFUND-INVEST') NOT NULL, "
-        "ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, "
+        "ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL, "
         "PRIMARY KEY (`user_id`))"
         )
 
@@ -92,9 +92,9 @@ def persistAccns(s3bucket,endpoint):
         print("OK - tables created.")
         print("Creating replication user debezium...")
         cursor.execute(TABLES['debezium'])
-        print("Granting required permissions to debezium user...")
+        print("Granting required permissions to replicator user...")
         cursor.execute(TABLES['grants'])
-        print("Setting up SSL for debezium user...")
+        print("Setting up SSL for replicator user...")
         cursor.execute(TABLES['encrypt_connection'])
         with open('account_ids.txt', 'w') as f:
             for item in accnslist:
