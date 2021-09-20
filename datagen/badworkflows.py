@@ -42,13 +42,7 @@ with open('account_ids.txt') as fr:
     lines = fr.readlines()
 
 dbconn = mysql.connector.connect(user='admin',password='master123', host=ep)
-count = 0 ## Control the number of DB entries we make
-for userid in lines:
-    if userid == str(10002):
-        continue
+for userid in lines[:1000]:
+    print("Inserting data for userid - {}".format(userid))
     normal_wf(userid,random.choice(cities),dbconn)
-    count = count + 1
-    if count == 1000:
-        break
-print("Inserted the data..{} records".format(count))
 dbconn.close()

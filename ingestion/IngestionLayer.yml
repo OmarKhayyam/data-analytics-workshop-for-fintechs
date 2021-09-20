@@ -7,8 +7,35 @@ Parameters:
     Type: String
     Description: ARN of the TeamRole IAM Role
 Resources:
+  KinesisIngestRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - dms.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Description: Role for ingesting data into Kinesis Data Stream
+      Path: /
+      Policies:
+        - PolicyName: KinesisIngest
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'kinesis:DescribeStream'
+                  - 'kinesis:PutRecords'
+                  - 'kinesis:PutRecord'
+                Resource: '*'
+      RoleName: ws-kinesis-ingest-role
   WSKinesisKey:
     Type: AWS::KMS::Key
+    DependsOn: KinesisIngestRole
     Properties:
       Description: A key for Kinesis
       EnableKeyRotation: 'true'
@@ -27,6 +54,18 @@ Resources:
             Effect: Allow
             Principal:
               Service: kinesis.amazonaws.com
+            Action:
+              - kms:DescribeKey
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:generateDataKey
+              - kms:GenerateDataKeyWithoutPlaintext
+            Resource: '*'
+          - Sid: Allow use of key
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt KinesisIngestRole.Arn
             Action:
               - kms:DescribeKey
               - kms:Encrypt
@@ -248,3 +287,15 @@ Outputs:
   MigrationSubnetGroup:
     Description: The subnet group the DMS service will use
     Value: !Ref DMSSubnetGroup
+  DMSSecuritygroup:
+    Description: SG to enable communication between replication instance and source.
+    Value: !GetAtt DMSSG.GroupId
+  RoleToEnableDMSIngestToKinesis:
+    Description: This role enables DMS to push data to Kinesis
+    Value: !GetAtt KinesisIngestRole.Arn
+  TargetStream:
+    Description: This is the target stream
+    Value: !GetAtt WSKinesisStream.Arn
+  WorkshopVPC:
+    Description: The VPC ID to use for this workshop
+    Value: !Ref LabVPC
