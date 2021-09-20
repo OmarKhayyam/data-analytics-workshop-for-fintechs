@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import random
+import time
 import argparse
 import mysql.connector
 from mysql.connector import errorcode
@@ -45,4 +46,5 @@ dbconn = mysql.connector.connect(user='admin',password='master123', host=ep)
 for userid in lines[:1000]:
     print("Inserting data for userid - {}".format(userid))
     normal_wf(userid,random.choice(cities),dbconn)
+    time.sleep(5)
 dbconn.close()
