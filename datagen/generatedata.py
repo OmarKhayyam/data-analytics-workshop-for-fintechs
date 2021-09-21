@@ -90,7 +90,7 @@ def persistAccns(s3bucket,endpoint):
             print(err.msg)
     else:
         print("OK - tables created.")
-        print("Creating replication user debezium...")
+        print("Creating replication user ...")
         cursor.execute(TABLES['debezium'])
         print("Granting required permissions to replicator user...")
         cursor.execute(TABLES['grants'])
