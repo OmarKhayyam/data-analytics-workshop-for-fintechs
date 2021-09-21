@@ -63,7 +63,7 @@ TABLES['grants'] = (
         )
 
 TABLES['encrypt_connection'] = (
-        "ALTER USER 'debezium'@'%' REQUIRE SSL"
+        "ALTER USER 'replicator'@'%' REQUIRE SSL"
         )
 
 def persistAccns(s3bucket,endpoint):
