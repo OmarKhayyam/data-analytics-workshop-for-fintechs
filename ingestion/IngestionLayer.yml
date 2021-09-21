@@ -34,7 +34,6 @@ Resources:
         - !GetAtt VPCESecurityGroup.GroupId
       ServiceName: !Sub 'com.amazonaws.${AWS::Region}.kinesis-streams'
       SubnetIds:
-        - !Ref EC2PublicSubnet
         - !Ref RDSPrivateSubnet1
         - !Ref RDSPrivateSubnet2
       VpcEndpointType: Interface
