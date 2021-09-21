@@ -7,6 +7,38 @@ Parameters:
     Type: String
     Description: ARN of the TeamRole IAM Role
 Resources:
+  VPCESecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: SG for VPC Kinesis Endpoint
+      GroupName: ws-VPCE-sg
+      VpcId: !Ref LabVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 10.0.0.0/16
+  VPCEforKinesis:
+    Type: AWS::EC2::VPCEndpoint
+    Properties:
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt KinesisIngestRole.Arn
+            Action: 'kinesis:*'
+            Resource: '*'
+      PrivateDnsEnabled: 'true'
+      SecurityGroupIds:
+        - !GetAtt VPCESecurityGroup.GroupId
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.kinesis-streams'
+      SubnetIds:
+        - !Ref EC2PublicSubnet
+        - !Ref RDSPrivateSubnet1
+        - !Ref RDSPrivateSubnet2
+      VpcEndpointType: Interface
+      VpcId: !Ref LabVPC
   KinesisIngestRole:
     Type: AWS::IAM::Role
     Properties:
