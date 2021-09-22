@@ -81,6 +81,7 @@ Resources:
       Path: /
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole'
+        - 'arn:aws:iam::aws:policy/AmazonKinesisReadOnlyAccess'
   WSDCEncKey:
     Type: AWS::KMS::Key
     Properties:
