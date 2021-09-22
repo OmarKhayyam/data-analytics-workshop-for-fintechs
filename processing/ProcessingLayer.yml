@@ -65,7 +65,7 @@ Resources:
       EncryptionConfiguration:
         S3Encryptions:
           - S3EncryptionMode: SSE-KMS
-            KmsKeyArn: !GetAtt WSGlueKMSKey.KeyId
+            KmsKeyArn: !GetAtt WSGlueKMSKey.Arn
       Name: Workshop-Glue-SecurityConfig
   WSGlueRole:
     Type: AWS::IAM::Role
