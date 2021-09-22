@@ -119,14 +119,14 @@ Resources:
     Properties:
       GroupDescription: SG for DMS
       VpcId: !Ref LabVPC
-  DMSSubnetGroup:
-    Type: AWS::DMS::ReplicationSubnetGroup
-    Properties:
-      ReplicationSubnetGroupIdentifier: replication-subnet-group
-      ReplicationSubnetGroupDescription: Subnet group for DMS
-      SubnetIds:
-        - !Ref RDSPrivateSubnet1
-        - !Ref RDSPrivateSubnet2
+#  DMSSubnetGroup:
+#    Type: AWS::DMS::ReplicationSubnetGroup
+#    Properties:
+#      ReplicationSubnetGroupIdentifier: replication-subnet-group
+#      ReplicationSubnetGroupDescription: Subnet group for DMS
+#      SubnetIds:
+#        - !Ref RDSPrivateSubnet1
+#        - !Ref RDSPrivateSubnet2
   LabBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Delete
@@ -316,9 +316,9 @@ Outputs:
   DBEndpoint:
     Description: DB endpoint
     Value: !GetAtt DataSourceDB.Endpoint.Address
-  MigrationSubnetGroup:
-    Description: The subnet group the DMS service will use
-    Value: !Ref DMSSubnetGroup
+#  MigrationSubnetGroup:
+#    Description: The subnet group the DMS service will use
+#    Value: !Ref DMSSubnetGroup
   DMSSecuritygroup:
     Description: SG to enable communication between replication instance and source.
     Value: !GetAtt DMSSG.GroupId
