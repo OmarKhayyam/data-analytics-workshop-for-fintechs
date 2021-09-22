@@ -47,6 +47,18 @@ Resources:
               - kms:generateDataKey
               - kms:GenerateDataKeyWithoutPlaintext
             Resource: '*'
+          - Sid: Allow use of key
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt WSGlueRole.Arn
+            Action:
+              - kms:DescribeKey
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:generateDataKey
+              - kms:GenerateDataKeyWithoutPlaintext
+            Resource: '*'
   WSGlueSecurityConfig:
     Type: AWS::Glue::SecurityConfiguration
     Properties:
@@ -55,6 +67,20 @@ Resources:
           S3EncryptionMode: SSE-KMS
           KmsKeyArn: !GetAtt WSGlueKMSKey.KeyId
       Name: Workshop-Glue-SecurityConfig
+  WSGlueRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: glue.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: /
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole'
   WSDCEncKey:
     Type: AWS::KMS::Key
     Properties:
@@ -86,7 +112,7 @@ Resources:
           - Sid: Allow use of key
             Effect: Allow
             Principal:
-              AWS: !GetAtt DataCatalogUpdateRole.Arn
+              AWS: !GetAtt WSGlueRole.Arn
             Action:
               - kms:DescribeKey
               - kms:Encrypt
@@ -109,7 +135,6 @@ Resources:
       DatabaseInput:
         Name: Data-Lake-WorkshopDB
         Description: Database to hold tables for this workshop
-  ### WIP ###
   GlueOutputBucket:
     Type: AWS::S3::Bucket
     DeletionPolicy: Delete
@@ -119,7 +144,7 @@ Resources:
           - BucketKeyEnabled: 'true'
             ServerSideEncryptionByDefault:
               SSEAlgorithm: 'aws:kms'
-              KMSMasterKeyID:
+              KMSMasterKeyID: !GetAtt WSGlueKMSKey.KeyId
   VPCESecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
