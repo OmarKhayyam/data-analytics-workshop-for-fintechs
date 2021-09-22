@@ -474,6 +474,9 @@ Outputs:
   SourceAndDataBucket:
     Description: The S3 bucket where source and intermediate data may be stored.
     Value: !Ref LabBucket
+  GlueOutputBucket:
+    Description: The S3 bucket where all the Glue outputs end up.
+    Value: !Ref GlueOutputBucket
   BastionInstance:
     Description: Instance created for data generation
     Value: !Ref Ec2Instance
