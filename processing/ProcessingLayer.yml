@@ -247,7 +247,7 @@ Resources:
           - Sid: Allow use of key by Glue
             Effect: Allow
             Principal:
-              AWS: !GetAtt GlueServiceRole.Arn
+              AWS: !GetAtt WSGlueRole.Arn
             Action:
               - kms:DescribeKey
               - kms:Encrypt
