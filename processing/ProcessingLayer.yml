@@ -127,6 +127,7 @@ Resources:
       CatalogId: !Ref AWS::AccountId
       DataCatalogEncryptionSettings:
         EncryptionAtRest:
+          CatalogEncryptionMode: SSE-KMS
           SseAwsKmsKeyId: !GetAtt WSDCEncKey.KeyId
   WSGlueDatabase:
     Type: AWS::Glue::Database
