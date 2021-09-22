@@ -133,7 +133,7 @@ Resources:
     Properties:
       CatalogId: !Ref AWS::AccountId
       DatabaseInput:
-        Name: Data-Lake-WorkshopDB
+        Name: datalakeworkshopdb
         Description: Database to hold tables for this workshop
   GlueOutputBucket:
     Type: AWS::S3::Bucket
