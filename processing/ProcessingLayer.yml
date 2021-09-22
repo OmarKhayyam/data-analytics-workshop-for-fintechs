@@ -494,3 +494,6 @@ Outputs:
   WorkshopVPC:
     Description: The VPC ID to use for this workshop
     Value: !Ref LabVPC
+  WorkshopGlueDatabase:
+    Description: The database in which we will create our tables
+    Value: !Ref WSGlueDatabase
