@@ -92,8 +92,7 @@ Resources:
                   - s3:ListBucket
                   - s3:PutObject
                   - s3:DeleteObject
-                Resource:
-                  - !GetAtt GlueOutputBucket.Arn
+                Resource: '*'
   WSDCEncKey:
     Type: AWS::KMS::Key
     Properties:
@@ -159,6 +158,8 @@ Resources:
             ServerSideEncryptionByDefault:
               SSEAlgorithm: 'aws:kms'
               KMSMasterKeyID: !GetAtt WSGlueKMSKey.KeyId
+      PublicAccessBlockConfiguration:
+        RestrictPublicBuckets: 'true'
   VPCESecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
