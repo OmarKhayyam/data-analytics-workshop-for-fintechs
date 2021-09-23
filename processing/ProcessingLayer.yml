@@ -82,6 +82,18 @@ Resources:
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole'
         - 'arn:aws:iam::aws:policy/AmazonKinesisReadOnlyAccess'
+      Policies:
+        - PolicyName: GlueS3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - s3:ListBucket
+                  - s3:PutObject
+                  - s3:DeleteObject
+                Resource:
+                  - !GetAtt GlueOutputBucket.Arn
   WSDCEncKey:
     Type: AWS::KMS::Key
     Properties:
