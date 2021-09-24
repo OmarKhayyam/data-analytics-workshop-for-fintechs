@@ -649,3 +649,6 @@ Outputs:
   WorkshopGlueDatabase:
     Description: The database in which we will create our tables
     Value: !Ref WSGlueDatabase
+  RedshiftSpectrumRole:
+    Description: The ARN of the IAM role required to create the spectrum schema
+    Value: !GetAtt WSRedshiftIAMRole.Arn
