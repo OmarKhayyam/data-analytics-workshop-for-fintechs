@@ -16,11 +16,11 @@ Resources:
         - ParameterName: enable_user_activity_logging
           ParameterValue: 'true'
         - ParameterName: max_concurrency_scaling_clusters
-          ParameterValue: 1
+          ParameterValue: '1'
         - ParameterName: require_ssl
           ParameterValue: 'true'
         - ParameterName: wlm_json_configuration
-          ParameterValue: [{"auto_wlm":true}]
+          ParameterValue: '[{"auto_wlm":true}]'
   WSRedshiftSubnetGroup:
     Type: AWS::Redshift::ClusterSubnetGroup
     Properties:
