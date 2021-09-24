@@ -125,7 +125,7 @@ Resources:
       KmsKeyId: !Ref WSRedshiftKmsKey
       ManualSnapshotRetentionPeriod: 1
       MasterUsername: 'admin'
-      MasterUserPassword: 'master123'
+      MasterUserPassword: 'Master123'
       NodeType: 'dc2.large'
       NumberOfNodes: 2
       PubliclyAccessible: 'false'
