@@ -100,11 +100,6 @@ Resources:
               - kms:generateDataKey
               - kms:GenerateDataKeyWithoutPlaintext
             Resource: '*'
-  WSRedshiftLogBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      PublicAccessBlockConfiguration:
-        RestrictPublicBuckets: 'true'
   WSRedshiftCluster:
     Type: AWS::Redshift::Cluster
     DeletionPolicy: Delete
@@ -116,9 +111,6 @@ Resources:
       ClusterSubnetGroupName: !Ref WSRedshiftSubnetGroup
       DBName: 'workshopredshiftdb'
       Encrypted: 'true'
-      LoggingProperties: 
-        BucketName: !Ref WSRedshiftLogBucket
-        S3KeyPrefix: 'redshiftlogs/'
       ClusterType: multi-node
       IamRoles: 
         - !GetAtt WSRedshiftIAMRole.Arn
