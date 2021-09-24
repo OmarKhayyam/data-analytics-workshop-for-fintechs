@@ -111,7 +111,7 @@ Resources:
     Properties:
       AllowVersionUpgrade: 'true'
       AquaConfigurationStatus: auto
-      ClusterIdentifier: 'Workshop-Redshift_Cluster'
+      ClusterIdentifier: 'Workshop-Redshift-Cluster'
       ClusterParameterGroupName: !Ref WSRedshiftPG
       ClusterSubnetGroupName: !Ref WSRedshiftSubnetGroup
       DBName: 'workshopredshiftdb'
