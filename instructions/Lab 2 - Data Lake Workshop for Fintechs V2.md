@@ -32,13 +32,11 @@ Lab 2 - Cataloguing
 24. The first column will be named **data**, and will be defined like
     so,
 
-    ![](media/image1.png){width="4.152777777777778in"
-    height="3.7222222222222223in"}
+    ![](./Data_Struct.png)
 
 25. The second column should be defined like so,
 
-    ![](media/image2.png){width="4.152777777777778in"
-    height="3.7222222222222223in"}
+    ![](./Metadata_Struct.png)
 
 26. Click **Next**. And **Next** again. Review on the next page and
     click **Finish**.
@@ -51,8 +49,7 @@ Lab 2 - Cataloguing
     from your Glue ETL job. Choose JSON as the classification. Finally,
     the columns should look like so,
 
-    ![](media/image3.png){width="6.263888888888889in"
-    height="2.5340277777777778in"}
+    ![](./Table_Mappings_0.png)
 
 28. Click **Next**. And then **Next** again. End with **Finish** as we
     did previously.
@@ -75,28 +72,24 @@ Lab 2 - Cataloguing
     output schema for all records** is already chosen. The table
     mappings will look something like this,
 
-    ![](media/image4.png){width="6.263888888888889in"
-    height="2.671527777777778in"}
+    ![](./Table_Mappings_1.png)
 
 31. We want to get rid of the metadata mappings, this is how you can do
     that, click in the white rectangle of the struct member whose
     mapping you want to remove, this results in a **textbox** with a
     **Save** button in the **Map to target.**
 
-    ![](media/image5.png){width="6.263888888888889in"
-    height="2.696527777777778in"}
+    ![](./Table_Mappings_2.png)
 
 32. Now click the **Save button,** this will remove the mapping, like
     so,
 
-    ![](media/image6.png){width="6.263888888888889in"
-    height="2.640972222222222in"}
+    ![](./Table_Mappings_3.png)
 
 33. Continue this until you remove all the mappings for the **metadata**
     STRUCT.
 
-    ![](media/image7.png){width="6.263888888888889in"
-    height="1.7215277777777778in"}
+    ![](./Table_Mappings_5.png)
 
 34. Click on **Save job and edit script**. On the next page, click **Run
     job**. You should see the files getting populated in the destination
