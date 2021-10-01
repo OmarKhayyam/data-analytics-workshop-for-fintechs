@@ -20,7 +20,7 @@ Lab 3 - Consumption
     cron expression according to your latency needs. Something like the
     following expression will run this every 5 minutes every day.
 
-    0/5 \* \* \* ? \*
+        0/5 \* \* \* ? \*
 
     Click **Next**. On the next page i.e. **Configure the crawler's
     output**, leave everything as-is, just click **Next**. Finally,
@@ -31,8 +31,7 @@ Lab 3 - Consumption
     output location setup. After setting up the output location you can
     try the following query,
 
-    select count(\*) as TotalNumberOfEntries from
-    datalakeworkshopdb.customerrequests\_destination;
+        select count(\*) as TotalNumberOfEntries from datalakeworkshopdb.<destination_table>;
 
     You can try other queries of your choice, to see how long it takes
     for an entry to reach your data lake, try this. **\[Takes time\]**
@@ -40,8 +39,7 @@ Lab 3 - Consumption
     source, copy the last userid that is inserted, and run the following
     query repeatedly,
 
-    select \* from datalakeworkshopdb.customerrequests\_destination
-    where user\_id = ??????;
+        select * from datalakeworkshopdb.<destination_table> where user_id = ??????;
 
 38. Alternatively, on your laptop/desktop change directory in your repo
     to consumption, and update stack like before with the
@@ -51,10 +49,10 @@ Lab 3 - Consumption
 39. Go to the Redshift console and start the Query Editor, run the
     following queries,
 
-    create external schema spectrum from data catalog database
-    \'datalakeworkshopdb\' iam\_role
-    \'arn:aws:iam::299653513543:role/datagenstack-WSRedshiftIAMRole-?????????????\'
-    create external database if not exists;
+        create external schema spectrum from data catalog database
+        'datalakeworkshopdb' iam_role
+        'arn:aws:iam::<account-id>:role/datagenstack-WSRedshiftIAMRole-?????????????'
+        create external database if not exists;
 
     If the **Query Editor** asks to create a new connection, accept it.
     For the **Database name**, provide the string workshopredshiftdb.
@@ -62,8 +60,7 @@ Lab 3 - Consumption
     button**. Try this query, you should get the output you are looking
     for,
 
-    select \* from spectrum.\<destination\_table\_from\_glue\_catalog\>
-    limit 50;
+        select * from spectrum.<destination_table_from_glue_catalog> limit 50;
 
     **Instructions for Cleanup for Resources created by hand:**
 
