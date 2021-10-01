@@ -26,7 +26,7 @@ Lab Preparation
     AWS CLI,
 
         git clone <https://github.com/OmarKhayyam/data-lake-ws.git> && cd
-    data-lake-ws && ./orchestrator.sh
+        data-lake-ws && ./orchestrator.sh
 
     **Make note of the outputs from the Cloudformation stack.**
 
