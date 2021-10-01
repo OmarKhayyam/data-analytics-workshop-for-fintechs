@@ -25,7 +25,7 @@ Lab Preparation
 2.  **\[Takes time\]** On your local machine where you have installed
     AWS CLI,
 
-        git clone <https://github.com/OmarKhayyam/data-lake-ws.git> && cd
+        git clone https://github.com/OmarKhayyam/data-lake-ws.git && cd
         data-lake-ws && ./orchestrator.sh
 
     **Make note of the outputs from the Cloudformation stack.**
@@ -41,17 +41,15 @@ Lab Preparation
     the cloudformation stack output*):
 
         cd && sudo yum update -y && sudo yum install -y git && git clone
-        [https://github.com/OmarKhayyam/data-lake-ws.git && cd
+        https://github.com/OmarKhayyam/data-lake-ws.git && cd
         data-lake-ws/datagen &&
-        ./instance\_setup.sh](https://github.com/OmarKhayyam/data-lake-ws.git%20&&%20cd%20data-lake-ws/datagen%20&&%20./instance_setup.sh)
-        && pip3 install -r ./requirements.txt && ./generatedata.py -s
-        \<**bucket\_name**\> -e \<**aurora\_db\_endpoint**\>
+        ./instance_setup.sh && pip3 install -r ./requirements.txt && ./generatedata.py -s <bucket_name> -e <aurora_db_endpoint>
 
 5.  Open the file badworkflows.py in vi editor and change the line
     number 46 to `for userid in lines\[:4000\]:` and then run the
     following command to start the data generation:
 
-        ./badworkflows.py -e \<**aurora\_db\_endpoint**\>
+        ./badworkflows.py -e <aurora_db_endpoint>
 
     This should create the initial data you need. Leave the running and
     proceed to the next step.
