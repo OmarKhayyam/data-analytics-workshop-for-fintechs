@@ -7,8 +7,7 @@ Lab 1 - Ingestion
 6.  Back to your laptop, download the RDS certificate chain, like shown
     below, we will need this later.
 
-    wget
-    <https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem>
+        wget https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
 
 7.  On your laptop, in the repository you cloned, navigate to the
     ingestion directory, you should find it at this location \<repo
