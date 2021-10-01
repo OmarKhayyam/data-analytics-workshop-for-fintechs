@@ -27,7 +27,9 @@ Lab Preparation
 
         git clone https://github.com/OmarKhayyam/data-lake-ws.git && cd
         data-lake-ws && ./orchestrator.sh
-
+    You can ignore the `git clone` command above and simply `cd` to `data-lakes-ws` 
+    or the directory where you have cloned this repo and issue the `orchestrator.sh`
+    command.
     **Make note of the outputs from the Cloudformation stack.**
 
 3.  Proceed to the EC2 console, choose the instance we just created,
