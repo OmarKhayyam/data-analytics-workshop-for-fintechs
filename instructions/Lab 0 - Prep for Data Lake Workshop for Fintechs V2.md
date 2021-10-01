@@ -22,7 +22,8 @@ Lab Preparation
         based clients except when we are using the AWS Management
         Console.
 
-2.  **\[Takes time\]** On your local machine where you have installed
+2.  **\[Takes time\]** If you have **not** already done this from the
+    first slide; On your local machine where you have installed
     AWS CLI,
 
         git clone https://github.com/OmarKhayyam/data-lake-ws.git && cd
