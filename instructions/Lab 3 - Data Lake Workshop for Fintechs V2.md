@@ -47,16 +47,13 @@ Lab 3 - Consumption
     stack Output for the Redshift IAM role ARN that you will need.
 
 39. Go to the Redshift console and start the Query Editor, run the
-    following queries,
+    following queries, 
 
-        create external schema spectrum from data catalog database
-        'datalakeworkshopdb' iam_role
-        'arn:aws:iam::<account-id>:role/datagenstack-WSRedshiftIAMRole-?????????????'
-        create external database if not exists;
+        create external schema spectrum from data catalog database 'datalakeworkshopdb' iam_role 'arn:aws:iam::<account-id>:role/datagenstack-WSRedshiftIAMRole-?????????????' create external database if not exists;
 
     If the **Query Editor** asks to create a new connection, accept it.
-    For the **Database name**, provide the string workshopredshiftdb.
-    For **User name**, provide the string admin. Click the **Connect
+    For the **Database name**, provide the string **workshopredshiftdb**.
+    For **User name**, provide the string **admin**. Click the **Connect
     button**. Try this query, you should get the output you are looking
     for,
 
