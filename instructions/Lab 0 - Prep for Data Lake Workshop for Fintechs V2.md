@@ -4,12 +4,13 @@ Data Lake workshop for Fintechs -- Instructions
 Lab Preparation
 ---------------
 
-1.  Ask participants to set up AWS CLI. Provide instructions for the
-    same.
+1.  You should have set up AWS CLI by now. After you, you have setup the CLI,
+    follow the instructions below,
 
     a.  Simply copy the export commands from the Event Engine dashboard
-        screen for Linux/MacOS, and you should be able to use the
-        AWS CLI.
+        screen. In case you are using Linux/MacOS, and you should simply paste
+        the commands you copied to your command prompt so the environment 
+        variables take effect.
 
     b.  In case of Windows, copy the commands from the Windows tab in
         the Event Engine dashboard screen, and paste it to the command
@@ -22,33 +23,23 @@ Lab Preparation
         based clients except when we are using the AWS Management
         Console.
 
-2.  **\[Takes time\]** If you have **not** already done this from the
-    first slide; On your local machine where you have installed
-    AWS CLI,
-
-        git clone https://github.com/OmarKhayyam/data-lake-ws.git && cd
-        data-lake-ws && ./orchestrator.sh
-    You can ignore the `git clone` command above and simply `cd` to `data-lakes-ws` 
-    or the directory where you have cloned this repo and issue the `orchestrator.sh`
-    command.
-    **Make note of the outputs from the Cloudformation stack.**
-
-3.  Proceed to the EC2 console, choose the instance we just created,
+2.  Proceed to the EC2 console, choose the instance we just created,
     click the connect button, click on the session manager tab, click
     **connect**. A terminal session will start in your browser window.
     **Again, setup the AWS CLI environment, just the way you set it up
     in step 1 above**.
 
-4.  Run the following command in the Session Manager session you started
+3.  Run the following command in the Session Manager session you started
     in step 3. (*you will get the bucket name and the DB endpoint from
     the cloudformation stack output*):
 
-        cd && sudo yum update -y && sudo yum install -y git && git clone
-        https://github.com/OmarKhayyam/data-lake-ws.git && cd
-        data-lake-ws/datagen &&
-        ./instance_setup.sh && pip3 install -r ./requirements.txt && ./generatedata.py -s <bucket_name> -e <aurora_db_endpoint>
+        cd && sudo yum update -y && sudo yum install -y git && git clone \
+        https://github.com/OmarKhayyam/data-lake-ws.git && cd \
+        data-lake-ws/datagen && ./instance_setup.sh && pip3 install -r \
+        ./requirements.txt && ./generatedata.py -s \
+        <bucket_name> -e <aurora_db_endpoint>
 
-5.  Open the file badworkflows.py in vi editor and change the line
+4.  Open the file badworkflows.py in vi editor and change the line
     number 46 to `for userid in lines\[:4000\]:` and then run the
     following command to start the data generation:
 
@@ -56,3 +47,4 @@ Lab Preparation
 
     This should create the initial data you need. Leave the running and
     proceed to the next step.
+
