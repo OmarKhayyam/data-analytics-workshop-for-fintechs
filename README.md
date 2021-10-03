@@ -8,7 +8,7 @@ that the workshop participant can use to populate an Amazon Aurora MySQL databas
 the particpants moves on to the next lab. To access the labs navigate to the `instructions` directory in 
 this repository.
 
-**Note: While copying commands from workshop instructions, make sure you remove all newlines from the commands
+**Note: While copying commands from workshop instructions, make sure you remove all newlines from the commands**
 
 Before you begin, you should have the AWS CLI installed ([instructions for AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)), you should clone this repo, 
 here, we assume you can choose to use a different directory name, change the command accordingly.
