@@ -11,7 +11,8 @@ Lab Preparation
         screen. In case you are using Linux/MacOS, and you should simply paste
         the commands you copied to your command prompt so the environment 
         variables take effect.
-
+![](./Credential_Sharing.png)
+![](./Using_Credentials.png)
     b.  In case of Windows, copy the commands from the Windows tab in
         the Event Engine dashboard screen, and paste it to the command
         prompt.
