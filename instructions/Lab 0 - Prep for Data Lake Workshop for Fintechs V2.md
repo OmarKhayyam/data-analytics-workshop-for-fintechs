@@ -4,7 +4,7 @@ Data Lake workshop for Fintechs -- Instructions
 Lab Preparation
 ---------------
 
-1.  You should have set up AWS CLI by now. After you, you have setup the CLI,
+1.  You should have set up AWS CLI by now. After you have setup the CLI,
     follow the instructions below,
 
     a.  Simply copy the export commands from the Event Engine dashboard
