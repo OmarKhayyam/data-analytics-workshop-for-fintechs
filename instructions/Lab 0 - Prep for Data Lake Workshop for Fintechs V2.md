@@ -4,7 +4,7 @@ Data Lake workshop for Fintechs -- Instructions
 Lab Preparation
 ---------------
 
-1. Run the following command after you set up the AWS CLI, you can choose to 
+1. Run the following command after you set up the AWS CLI in your shell, you can choose to 
    use a different directory name, change the command accordingly.
 
         git clone https://github.com/OmarKhayyam/data-lake-ws.git && cd data-lake-ws && ./orchestrator.sh
@@ -12,11 +12,11 @@ Lab Preparation
    You will use the output from the cloudformation stack for the rest of these instructions. 
    You can go to the AWS Management Console and then to the Cloudformation console to look at the outputs.
 
-2.  Proceed to the EC2 console, choose the instance we just created,
-    click the connect button, click on the session manager tab, click
-    **connect**. A terminal session will start in your browser window.
+2.  On the AWS Management Console proceed to the EC2 console, choose the 
+    instance we just created, click the connect button, click on the session 
+    manager tab, click **Connect**. A terminal session will start in your browser window.
     **Again, setup the AWS CLI environment, just the way you set it up
-    in step 1 above**.
+    in the [pre-requisities](../README.md) section in the README**.
 
 3.  Run the following command in the Session Manager session you started
     in step 3. (*you will get the bucket name and the DB endpoint from
