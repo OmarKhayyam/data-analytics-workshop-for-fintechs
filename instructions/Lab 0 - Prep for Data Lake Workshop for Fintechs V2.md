@@ -29,7 +29,7 @@ Lab Preparation
         <bucket_name> -e <aurora_db_endpoint>
 
 4.  Open the file badworkflows.py in vi editor and change the line
-    number 46 to `for userid in lines\[:4000\]:` and then run the
+    number 46 to `for userid in lines[:4000]:` and then run the
     following command to start the data generation:
 
         ./badworkflows.py -e <aurora_db_endpoint>
