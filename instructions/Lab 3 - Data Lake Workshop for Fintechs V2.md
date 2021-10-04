@@ -20,7 +20,7 @@ Lab 3 - Consumption
     cron expression according to your latency needs. Something like the
     following expression will run this every 5 minutes every day.
 
-        0/5 \* \* \* ? \*
+        0/5 * * * ? *
 
     Click **Next**. On the next page i.e. **Configure the crawler's
     output**, leave everything as-is, just click **Next**. Finally,
@@ -31,7 +31,7 @@ Lab 3 - Consumption
     output location setup. After setting up the output location you can
     try the following query,
 
-        select count(\*) as TotalNumberOfEntries from datalakeworkshopdb.<destination_tablename>;
+        select count(*) as TotalNumberOfEntries from datalakeworkshopdb.<destination_tablename>;
 
     You can try other queries of your choice, to see how long it takes
     for an entry to reach your data lake, try this. **\[Takes time\]**
