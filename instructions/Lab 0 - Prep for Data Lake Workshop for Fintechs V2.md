@@ -4,25 +4,10 @@ Data Lake workshop for Fintechs -- Instructions
 Lab Preparation
 ---------------
 
-1.  You should have set up AWS CLI by now. After you have setup the CLI,
-    follow the instructions below,
+1. Run the following command after you set up the AWS CLI, you can choose to 
+   use a different directory name, change the command accordingly.
 
-    a.  Simply copy the export commands from the Event Engine dashboard
-        screen. In case you are using Linux/MacOS, and you should simply paste
-        the commands you copied to your command prompt so the environment 
-        variables take effect.
-![](./Credential_Sharing_V1.png)
-![](./Using_Credentials.png)
-    b.  In case of Windows, copy the commands from the Windows tab in
-        the Event Engine dashboard screen, and paste it to the command
-        prompt.
-
-    c.  Do the same for the Powershell prompt if you are using
-        Powershell
-
-        For this workshop, we will assume that we are using Linux/Mac
-        based clients except when we are using the AWS Management
-        Console.
+        git clone https://github.com/OmarKhayyam/data-lake-ws.git && cd data-lake-ws && ./orchestrator.sh
 
 2.  Proceed to the EC2 console, choose the instance we just created,
     click the connect button, click on the session manager tab, click
