@@ -8,6 +8,9 @@ Lab Preparation
    use a different directory name, change the command accordingly.
 
         git clone https://github.com/OmarKhayyam/data-lake-ws.git && cd data-lake-ws && ./orchestrator.sh
+   
+   You will use the output from the cloudformation stack for the rest of these instructions. 
+   You can go to the AWS Management Console and then to the Cloudformation console to look at the outputs.
 
 2.  Proceed to the EC2 console, choose the instance we just created,
     click the connect button, click on the session manager tab, click
