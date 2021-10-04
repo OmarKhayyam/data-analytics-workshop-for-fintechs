@@ -34,7 +34,7 @@ Lab Preparation
 
         ./badworkflows.py -e <aurora_db_endpoint>
 
-    This should create the initial data you need. Leave the running and
-    proceed to the next step.
+    This should create the initial data you need. Leave this running and
+    proceed to the next step by opening a new browser tab.
 
 5. Reserved
