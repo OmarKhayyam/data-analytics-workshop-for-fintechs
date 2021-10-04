@@ -95,4 +95,4 @@ Lab 2 - Cataloguing
 34. Click on **Save job and edit script**. On the next page, click **Run
     job**. You should see the files getting populated in the destination
     bucket/prefix location you had specified when you created the
-    destination table in step 27.
+    destination table in step 27. You can now move on to the next lab.
