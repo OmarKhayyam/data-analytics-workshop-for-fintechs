@@ -31,7 +31,7 @@ Lab 3 - Consumption
     output location setup. After setting up the output location you can
     try the following query,
 
-        select count(\*) as TotalNumberOfEntries from datalakeworkshopdb.<destination_table>;
+        select count(\*) as TotalNumberOfEntries from datalakeworkshopdb.<destination_tablename>;
 
     You can try other queries of your choice, to see how long it takes
     for an entry to reach your data lake, try this. **\[Takes time\]**
