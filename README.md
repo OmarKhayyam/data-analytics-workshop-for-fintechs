@@ -29,7 +29,9 @@ this repository.
         For this workshop, we will assume that we are using Linux/Mac
         based clients except when we are using the AWS Management
         Console. 
-3. You should install wget, you can find the installation instructions [here](https://macappstore.org/wget/). 
+3. You should install `wget`, you can find the installation instructions for Mac [here](https://macappstore.org/wget/). 
+   For Linux, you may [follow these instructions](https://linuxize.com/post/wget-command-examples/).
+   Finally, you can install `wget` for Windows, [follow these instructions](http://gnuwin32.sourceforge.net/packages/wget.htm).
 
 ### Lab 0
 The participants will create the initial setup that will generate the data for them for the rest of this
