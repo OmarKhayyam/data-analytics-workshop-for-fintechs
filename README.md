@@ -10,10 +10,26 @@ this repository.
 
 **Note: While copying commands from workshop instructions, make sure you remove all newlines from the commands**
 
-Before you begin, you should have the AWS CLI installed ([instructions for AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)), you should clone this repo, 
-here, we assume you can choose to use a different directory name, change the command accordingly.
+## Pre-requisites
+1. Before you begin, you should have the AWS CLI installed ([instructions for AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-install.html)).
+2. Instructions for setting up AWS credentials from the sandbox environment shared with you are as follows,
+    a.  Simply copy the export commands from the Event Engine dashboard
+        screen. In case you are using Linux/MacOS, and you should simply paste
+        the commands you copied to your command prompt so the environment 
+        variables take effect.
+![](./Credential_Sharing_V1.png)
+![](./Using_Credentials.png)
+    b.  In case of Windows, copy the commands from the Windows tab in
+        the Event Engine dashboard screen, and paste it to the command
+        prompt.
 
-    git clone https://github.com/OmarKhayyam/data-lake-ws.git && cd data-lake-ws && ./orchestrator.sh
+    c.  Do the same for the Powershell prompt if you are using
+        Powershell
+
+        For this workshop, we will assume that we are using Linux/Mac
+        based clients except when we are using the AWS Management
+        Console. 
+3. You should install wget, you can find the installation instructions [here](https://macappstore.org/wget/). 
 
 ### Lab 0
 The participants will create the initial setup that will generate the data for them for the rest of this
