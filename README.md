@@ -15,9 +15,10 @@ this repository.
 2. You will be provided a hash, 16 or 12 characters in length.
 3. On your browser, navigate to https://dashboard.eventengine.run/dashboard
 4. When prompted, provide the hash. Accept terms and proceed.
-5. This will take you to the **Team Dashboard**. 
-6. Click on the **AWS Console** button. Proceed to the next step.
-7. Instructions for setting up AWS credentials from the sandbox environment shared with you are as follows,
+5. On the next screen, choose an authentication method. We recommend using an OTP passcode sent to your email address.
+6. This will take you to the **Team Dashboard**. 
+7. Click on the **AWS Console** button. Proceed to the next step.
+8. Instructions for setting up AWS credentials from the sandbox environment shared with you are as follows,
     a.  Simply copy the export commands from the Event Engine dashboard
         screen. In case you are using Linux/MacOS, and you should simply paste
         the commands you copied to your command prompt so the environment 
