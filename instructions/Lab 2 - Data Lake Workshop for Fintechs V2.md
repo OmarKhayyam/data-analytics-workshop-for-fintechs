@@ -6,7 +6,7 @@ Lab 2 - Cataloguing
 
 19. Next, go back to your laptop/desktop and navigate to the
     Cloudformation console. Choose the stack, and click the Update
-    button. Use the **processing/CatalogingLayer.yml** file for the
+    button. Use the **cataloguing/CatalogingLayer.yml** file for the
     update. Follow the same process as for the last update.
 
 20. Once the update from the last step is complete. Manually add a table
@@ -43,11 +43,12 @@ Lab 2 - Cataloguing
 
 27. We created the source table, we will now create the destination
     table. Proceed with the same steps as before until we reach the step
-    where we add columns. Remember to S3 as your data source this time.
+    where we add columns. Remember to set S3 as your data source this time.
     Provide an **Include path**, this path is the path to the
-    destination S3 with prefix where you intend to deliver the payload
-    from your Glue ETL job. Choose JSON as the classification. Finally,
-    the columns should look like so,
+    destination S3 bucket with prefix where you intend to deliver the payload
+    from your Glue ETL job, choose the S3 bucket from the Cloudformation stack
+    output, look for **GlueOutputBucket** in the Outputs. 
+    Choose JSON as the classification. Finally, the columns should look like so,
 
     ![](./Table_Mappings_0.png)
 
