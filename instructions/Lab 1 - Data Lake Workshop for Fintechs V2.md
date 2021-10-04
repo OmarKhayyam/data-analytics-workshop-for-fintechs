@@ -12,7 +12,8 @@ Lab 1 - Ingestion
 7.  On your laptop, in the repository you cloned, navigate to the
     ingestion directory, you should find it at this location \<repo
     directory\>/ingestion. Now open the Cloudformation console, and
-    choose the stack you instantiated in step 2. Click **Update**.
+    choose the stack you instantiated in step 2. Choose to 
+    **Replace current template** and click **Update**.
     Upload the **IngestionLayer.yml** file. Click **Next**.
 
 8.  Open the IAM console in another browser tab, click **Roles** in the
@@ -38,11 +39,11 @@ Lab 1 - Ingestion
     replication instance button**. Provide the instance a name, choose
     an instance class, preferably similar to the DB instance that will
     be its source or larger if you intend to run more tasks, you can
-    choose **r5.large**. Choose the VPC you created. Choose **Production
-    (MultiAZ),** uncheck **Publicly accessible.** Finally, open the
-    **Advanced security and network configuration**, and from the drop
-    down choose the DMS Security Group you created in the stack in step
-    8 (look for **DMSSecurityGroup** in the stack's **Output** tab).
+    choose **r5.large**. Choose the VPC from the Cloudformation stack output. 
+    Choose **Production (MultiAZ),** uncheck **Publicly accessible.** 
+    Finally, open the **Advanced security and network configuration**, and 
+    from the drop down choose the DMS Security Group you created in the 
+    stack in step 8 (look for **DMSSecurityGroup** in the stack's **Output** tab).
     Click **Create**. You will have to wait for some time for the
     instance to be available.
 
@@ -88,9 +89,10 @@ Lab 1 - Ingestion
     **Table name** leave it as %, leave **Action** as-is, and click
     **Create task**.
 
-17. You can observe as the records start streaming in, observe the
-    Kinesis Stream **Monitoring** tab. Additionally, you could setup a
-    Kinesis Firehose Delivery Stream and deliver the records to an S3
-    bucket to take a look at the payload.
+17. Navigate to the Kinesis Management Console where you can observe as the 
+    records start streaming in. Choose the Kinesis Data Stream we created, 
+    click on the **Monitoring** tab. 
+    Additionally, you could setup a Kinesis Firehose Delivery Stream and deliver 
+    the records to an S3 bucket to take a look at the payload.
 
 18. **Reserved**
